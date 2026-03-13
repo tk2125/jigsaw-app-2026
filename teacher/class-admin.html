@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>クラス管理 | ジグソー授業管理</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/teacher.css">
+</head>
+<body>
+  <div id="loading" class="hidden"><div class="spinner"></div></div>
+
+  <div class="teacher-layout">
+    <aside class="teacher-sidebar">
+      <div class="sidebar-header">
+        <h1>📚 ジグソー授業管理</h1>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span> ダッシュボード</a>
+        <a href="lesson-admin.html" class="nav-item"><span class="nav-icon">📝</span> 授業管理</a>
+        <a href="class-admin.html" class="nav-item active"><span class="nav-icon">🏫</span> クラス管理</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="btn-logout" class="nav-item" style="color: #f87171;">
+          <span class="nav-icon">🚪</span> ログアウト
+        </button>
+      </div>
+    </aside>
+
+    <div class="teacher-main">
+      <header class="teacher-topbar">
+        <h2>クラス管理</h2>
+      </header>
+
+      <main class="teacher-content">
+        <div id="error-message" class="alert alert-error hidden"></div>
+        <div id="success-message" class="alert alert-success hidden"></div>
+
+        <div class="class-admin-grid">
+          <!-- 左: 年度管理 -->
+          <div>
+            <div class="card">
+              <div class="panel-header">
+                <span class="panel-title">📅 年度</span>
+              </div>
+              <div id="year-list" style="margin-bottom: 16px;">
+                <!-- JS で描画 -->
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="input-new-year" class="form-input"
+                  placeholder="例: 2025年度">
+                <button id="btn-add-year" class="btn btn-primary btn-sm" style="white-space: nowrap;">
+                  + 追加
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右: クラス管理 -->
+          <div>
+            <div class="card">
+              <div class="panel-header">
+                <span class="panel-title" id="class-panel-title">クラス</span>
+              </div>
+              <div id="class-list" style="margin-bottom: 16px;">
+                <div class="empty-state">
+                  <p>年度を選んでください</p>
+                </div>
+              </div>
+              <div id="class-add-form" class="hidden" style="display: flex; gap: 8px;">
+                <input type="text" id="input-new-class" class="form-input"
+                  placeholder="例: 高1-A">
+                <button id="btn-add-class" class="btn btn-primary btn-sm" style="white-space: nowrap;">
+                  + 追加
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 使い方ガイド -->
+        <div class="card mt-lg" style="margin-top: 20px;">
+          <div style="font-size: 13px; color: var(--color-text-muted); line-height: 1.8;">
+            <strong>使い方</strong><br>
+            1. 年度を追加（例：「2025年度」）<br>
+            2. 年度をクリックしてクラスを追加（例：「高1-A」「高1-B」）<br>
+            3. 授業管理ページで実施クラスを設定する際に使います
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/teacher/auth.js"></script>
+  <script src="../js/teacher/class-admin.js"></script>
+</body>
+</html>

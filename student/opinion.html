@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Opinionシート | ジグソー授業</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/student.css">
+</head>
+<body>
+  <div id="loading" class="hidden"><div class="spinner"></div><p>読み込み中...</p></div>
+
+  <header class="student-header">
+    <span class="app-title">📚 ジグソー授業</span>
+    <span class="phase-label">Opinionシート</span>
+    <span class="trump-badge" id="trump-badge">--</span>
+  </header>
+
+  <div id="readonly-banner" class="readonly-banner hidden">
+    👁 閲覧モードです（編集できません）
+  </div>
+
+  <main class="student-main">
+    <div id="error-message" class="alert alert-error hidden"></div>
+    <div id="success-message" class="alert alert-success hidden"></div>
+
+    <!-- 中心発問 -->
+    <div class="central-question" id="central-question">読み込み中...</div>
+
+    <!-- 立場選択 -->
+    <div class="section-block">
+      <div class="section-title">🤔 あなたの立場を選んでください</div>
+      <div id="position-area">
+        <!-- JSで動的に生成 -->
+      </div>
+    </div>
+
+    <!-- 指定語句 -->
+    <div class="section-block" id="terms-section">
+      <div class="section-title">📝 使いたい語句を選んでください</div>
+      <div class="terms-grid" id="terms-grid">
+        <!-- JSで動的に生成 -->
+      </div>
+      <p class="form-hint">選んだ語句は意見文の中で自動的にハイライトされます</p>
+    </div>
+
+    <!-- 意見文 -->
+    <div class="section-block">
+      <div class="section-title">✍️ あなたの意見を書いてください</div>
+      <div class="form-group" style="margin-bottom: 8px;">
+        <textarea id="opinion-input" class="form-textarea" rows="8"
+          placeholder="選んだ立場の理由を、指定語句を使いながら書きましょう..."></textarea>
+        <div class="char-count"><span id="opinion-char-count">0</span>文字</div>
+      </div>
+      <div id="opinion-preview-wrap" class="hidden">
+        <p style="font-size: 14px; color: var(--color-text-muted); margin-bottom: 6px;">
+          プレビュー（選んだ語句がハイライトされます）
+        </p>
+        <div class="opinion-preview" id="opinion-preview"></div>
+      </div>
+    </div>
+
+    <!-- ルーブリック自己採点 -->
+    <div class="section-block">
+      <div class="section-title">📊 自己採点</div>
+      <div class="rubric-grid">
+        <div class="rubric-item">
+          <label for="rubric-logic">論理（ロジック）</label>
+          <p class="rubric-criteria" id="rubric-logic-criteria"></p>
+          <select id="rubric-logic" class="form-select">
+            <option value="">選んでください</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="E">E</option>
+            <option value="F">F</option>
+          </select>
+        </div>
+        <div class="rubric-item">
+          <label for="rubric-source">根拠（ソース）</label>
+          <p class="rubric-criteria" id="rubric-source-criteria"></p>
+          <select id="rubric-source" class="form-select">
+            <option value="">選んでください</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="E">E</option>
+            <option value="F">F</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- AIフィードバック -->
+    <div class="section-block">
+      <div class="section-title">🤖 AIサポート（任意）</div>
+      <button id="btn-ai-opinion" class="btn btn-outline btn-student">
+        💡 AIにフィードバックをもらう
+      </button>
+      <p class="form-hint mt-sm">※ 立場と意見文を入力してから使えます</p>
+    </div>
+
+    <!-- 提出ボタン -->
+    <div style="text-align: right; padding-bottom: 40px;">
+      <button id="btn-submit-opinion" class="btn btn-success btn-lg btn-student" disabled>
+        提出して意見交換へ →
+      </button>
+      <p class="form-hint mt-sm" id="submit-hint">立場と意見文を入力してください</p>
+    </div>
+  </main>
+
+  <!-- AIフィードバックモーダル -->
+  <div id="modal-opinion-feedback" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3>💡 AIからのフィードバック</h3>
+        <button class="modal-close" data-close="modal-opinion-feedback">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="opinion-feedback-content" class="ai-feedback-text">読み込み中...</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close="modal-opinion-feedback">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/claude-client.js"></script>
+  <script src="../js/student/opinion.js"></script>
+</body>
+</html>

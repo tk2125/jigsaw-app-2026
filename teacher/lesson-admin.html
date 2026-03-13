@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>授業管理 | ジグソー授業管理</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/teacher.css">
+</head>
+<body>
+  <div id="loading" class="hidden"><div class="spinner"></div></div>
+
+  <div class="teacher-layout">
+    <aside class="teacher-sidebar">
+      <div class="sidebar-header">
+        <h1>📚 ジグソー授業管理</h1>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span> ダッシュボード</a>
+        <a href="lesson-admin.html" class="nav-item active"><span class="nav-icon">📝</span> 授業管理</a>
+        <a href="class-admin.html" class="nav-item"><span class="nav-icon">🏫</span> クラス管理</a>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="btn-logout" class="nav-item" style="color: #f87171;">
+          <span class="nav-icon">🚪</span> ログアウト
+        </button>
+      </div>
+    </aside>
+
+    <div class="teacher-main">
+      <header class="teacher-topbar">
+        <h2>授業管理</h2>
+        <button id="btn-new-lesson" class="btn btn-primary btn-sm">+ 新しい授業を作成</button>
+      </header>
+
+      <main class="teacher-content">
+        <div id="error-message" class="alert alert-error hidden"></div>
+        <div id="success-message" class="alert alert-success hidden"></div>
+
+        <div class="lesson-admin-layout">
+          <!-- 左: 授業一覧 -->
+          <div class="lesson-admin-left">
+            <div class="panel-header">
+              <span class="panel-title">授業一覧</span>
+            </div>
+            <div id="lesson-list" class="lesson-list">
+              <div class="empty-state">
+                <div class="empty-state-icon">📝</div>
+                <p>授業がまだありません</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右: 授業フォーム -->
+          <div id="lesson-form-panel">
+            <div class="empty-state" id="form-empty-state">
+              <div class="empty-state-icon">👈</div>
+              <p>左の一覧から授業を選ぶか、「新しい授業を作成」を押してください</p>
+            </div>
+
+            <div id="lesson-form" class="hidden">
+              <div class="panel-header" style="margin-bottom: 16px;">
+                <span class="panel-title" id="form-title">新しい授業</span>
+                <div style="display: flex; gap: 8px;">
+                  <button id="btn-save-lesson" class="btn btn-success btn-sm">💾 保存</button>
+                  <button id="btn-delete-lesson" class="btn btn-danger btn-sm hidden">🗑 削除</button>
+                </div>
+              </div>
+
+              <!-- 基本設定 -->
+              <div class="form-section">
+                <div class="form-section-header">① 基本設定</div>
+                <div class="form-section-body">
+                  <div class="form-group">
+                    <label class="form-label">授業名 *</label>
+                    <input type="text" id="field-name" class="form-input" placeholder="例: 第一次世界大戦の要因">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">パスワード（複数登録可）</label>
+                    <div class="tag-input-area" id="passwords-area">
+                      <input type="text" class="tag-input" id="password-tag-input"
+                        placeholder="入力してEnterで追加（例: 1914, WWI）">
+                    </div>
+                    <p class="form-hint">全角・半角・大文字・小文字は自動で同一視されます</p>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">スート数 *</label>
+                    <div style="display: flex; gap: 20px; margin-top: 8px;">
+                      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="radio" name="suit-count" value="3" checked> ♤♧♡ 3種類
+                      </label>
+                      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="radio" name="suit-count" value="4"> ♤♧♡♢ 4種類
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 発問・立場設定 -->
+              <div class="form-section">
+                <div class="form-section-header">② 発問・立場設定</div>
+                <div class="form-section-body">
+                  <div class="form-group">
+                    <label class="form-label">中心発問 *</label>
+                    <textarea id="field-central-question" class="form-textarea" rows="3"
+                      placeholder="例: 第一次世界大戦を「防げた戦争」と「防げなかった戦争」のどちらと見るか？"></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">立場の種類 *</label>
+                    <div style="display: flex; gap: 20px; margin-top: 8px; flex-wrap: wrap;">
+                      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="radio" name="position-type" value="binary" checked> 二択（A/B）
+                      </label>
+                      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="radio" name="position-type" value="ternary"> 三択（A/B/C）
+                      </label>
+                      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="radio" name="position-type" value="free"> 自由記述
+                      </label>
+                    </div>
+                  </div>
+                  <div id="position-labels-area">
+                    <div class="form-row" id="binary-labels">
+                      <div class="form-group">
+                        <label class="form-label">Aのラベル</label>
+                        <input type="text" id="field-pos-a" class="form-input" placeholder="例: 防げた戦争">
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">Bのラベル</label>
+                        <input type="text" id="field-pos-b" class="form-input" placeholder="例: 防げなかった戦争">
+                      </div>
+                    </div>
+                    <div class="form-group hidden" id="ternary-c-label">
+                      <label class="form-label">Cのラベル</label>
+                      <input type="text" id="field-pos-c" class="form-input" placeholder="例: どちらとも言えない">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 指定語句 -->
+              <div class="form-section">
+                <div class="form-section-header">③ 指定語句</div>
+                <div class="form-section-body">
+                  <div class="form-group">
+                    <label class="form-label">語句リスト（Enterで追加）</label>
+                    <div class="tag-input-area" id="terms-area">
+                      <input type="text" class="tag-input" id="term-tag-input"
+                        placeholder="例: 民族主義、帝国主義、同盟関係">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ルーブリック -->
+              <div class="form-section">
+                <div class="form-section-header">④ ルーブリック基準</div>
+                <div class="form-section-body">
+                  <div class="form-group">
+                    <label class="form-label">論理（ロジック）の基準</label>
+                    <textarea id="field-rubric-logic" class="form-textarea" rows="3"
+                      placeholder="例: A=論理展開が明確で一貫している、B=論理は通じるが不完全..."></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">根拠（ソース）の基準</label>
+                    <textarea id="field-rubric-source" class="form-textarea" rows="3"
+                      placeholder="例: A=資料の内容を正確に引用している、B=根拠はあるが不正確..."></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 資料 -->
+              <div class="form-section">
+                <div class="form-section-header">⑤ 各スートの資料</div>
+                <div class="form-section-body">
+                  <div class="suit-tabs" id="material-tabs"></div>
+                  <div id="material-panels"></div>
+                </div>
+              </div>
+
+              <!-- 詳細設定 -->
+              <div class="form-section">
+                <div class="form-section-header">⑥ 詳細設定</div>
+                <div class="form-section-body">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">エキスパート活動タイマー（分）</label>
+                      <input type="number" id="field-timer" class="form-input" value="15" min="1" max="60">
+                    </div>
+                    <div class="form-group" id="remainder-type-group">
+                      <label class="form-label">余り処理（3スート時の♢）</label>
+                      <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                          <input type="radio" name="remainder-type" value="joker" checked>
+                          ジョーカー（好きな班へ）
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                          <input type="radio" name="remainder-type" value="priority_suit">
+                          優先割当スート
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group hidden" id="priority-suit-group">
+                    <label class="form-label">優先割当スート（♢を何スートとして扱うか）</label>
+                    <select id="field-priority-suit" class="form-select">
+                      <option value="♤">♤ スペード</option>
+                      <option value="♧">♧ クラブ</option>
+                      <option value="♡">♡ ハート</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 実施クラス -->
+              <div class="form-section" id="sessions-section">
+                <div class="form-section-header">
+                  ⑦ 実施クラス
+                  <button id="btn-add-session" class="btn btn-secondary btn-sm" style="margin-left: auto;">
+                    + 追加
+                  </button>
+                </div>
+                <div class="form-section-body">
+                  <div id="session-form" class="hidden" style="background: var(--color-bg); padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label class="form-label">年度</label>
+                        <select id="field-session-year" class="form-select">
+                          <option value="">選んでください</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">クラス</label>
+                        <select id="field-session-class" class="form-select">
+                          <option value="">年度を選んでください</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">実施日</label>
+                      <input type="date" id="field-session-date" class="form-input">
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                      <button id="btn-save-session" class="btn btn-success btn-sm">追加する</button>
+                      <button id="btn-cancel-session" class="btn btn-secondary btn-sm">キャンセル</button>
+                    </div>
+                  </div>
+                  <div id="session-list-in-form">
+                    <p class="text-muted" style="font-size: 13px;">まず授業を保存してから実施クラスを追加できます</p>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /lesson-form -->
+          </div><!-- /lesson-form-panel -->
+        </div><!-- /lesson-admin-layout -->
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/teacher/auth.js"></script>
+  <script src="../js/teacher/lesson-admin.js"></script>
+</body>
+</html>

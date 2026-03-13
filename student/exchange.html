@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>意見交換 | ジグソー授業</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/student.css">
+</head>
+<body>
+  <div id="loading" class="hidden"><div class="spinner"></div><p>読み込み中...</p></div>
+
+  <header class="student-header">
+    <span class="app-title">📚 ジグソー授業</span>
+    <span class="phase-label">意見交換</span>
+    <span class="trump-badge" id="trump-badge">--</span>
+  </header>
+
+  <main class="student-main">
+    <div id="error-message" class="alert alert-error hidden"></div>
+    <div id="success-message" class="alert alert-success hidden"></div>
+
+    <!-- 待機画面 -->
+    <div id="waiting-screen" class="waiting-screen">
+      <span class="waiting-icon">⏳</span>
+      <div class="waiting-title">しばらくお待ちください</div>
+      <div class="waiting-desc">先生が意見交換フェーズを開始するまでお待ちください</div>
+      <p class="text-muted mt-md" style="font-size: 14px;">（自動で更新されます）</p>
+    </div>
+
+    <!-- 意見交換メインコンテンツ -->
+    <div id="exchange-content" class="hidden">
+
+      <!-- 立場分布グラフ（binary/ternaryの場合のみ） -->
+      <div class="section-block" id="position-chart-section">
+        <div class="section-title">📊 立場の分布</div>
+        <div class="bar-chart" id="position-chart">
+          <!-- JSで動的に生成 -->
+        </div>
+        <p class="form-hint mt-sm">緑のバーがあなたの立場です</p>
+      </div>
+
+      <!-- 投稿ボード -->
+      <div class="section-block">
+        <div class="section-title">💬 みんなの意見</div>
+        <div class="post-board" id="post-board">
+          <!-- JSで動的に生成 -->
+        </div>
+        <div class="empty-state hidden" id="posts-empty">
+          <p>まだ投稿がありません。最初に投稿してみましょう！</p>
+        </div>
+      </div>
+
+      <!-- 新規投稿フォーム -->
+      <div class="section-block" id="post-form-section">
+        <div class="section-title">✏️ 意見・感想を投稿する</div>
+        <div class="post-form">
+          <textarea id="post-input"
+            placeholder="意見や感想を投稿してください（匿名で表示されます）..."></textarea>
+          <button id="btn-post" class="btn btn-primary btn-student">
+            投稿<br>する
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/student/exchange.js"></script>
+</body>
+</html>

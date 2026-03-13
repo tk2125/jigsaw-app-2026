@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ダッシュボード | ジグソー授業管理</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/teacher.css">
+</head>
+<body>
+  <div id="loading" class="hidden"><div class="spinner"></div></div>
+
+  <div class="teacher-layout">
+    <!-- サイドバー -->
+    <aside class="teacher-sidebar">
+      <div class="sidebar-header">
+        <h1>📚 ジグソー授業管理</h1>
+        <p>教師用ダッシュボード</p>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item active">
+          <span class="nav-icon">📊</span> ダッシュボード
+        </a>
+        <a href="lesson-admin.html" class="nav-item">
+          <span class="nav-icon">📝</span> 授業管理
+        </a>
+        <a href="class-admin.html" class="nav-item">
+          <span class="nav-icon">🏫</span> クラス管理
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="btn-logout" class="nav-item" style="color: #f87171;">
+          <span class="nav-icon">🚪</span> ログアウト
+        </button>
+      </div>
+    </aside>
+
+    <!-- メインエリア -->
+    <div class="teacher-main">
+      <header class="teacher-topbar">
+        <h2>ダッシュボード</h2>
+        <div class="topbar-right">
+          <span class="last-updated" id="last-updated"></span>
+          <button id="btn-refresh" class="btn btn-secondary btn-sm">🔄 更新</button>
+        </div>
+      </header>
+
+      <main class="teacher-content">
+        <div id="error-message" class="alert alert-error hidden"></div>
+        <div id="success-message" class="alert alert-success hidden"></div>
+
+        <!-- 授業選択セクション -->
+        <div class="card mb-md">
+          <div class="panel-header">
+            <span class="panel-title">📋 実施中の授業セッション</span>
+            <button id="btn-load-sessions" class="btn btn-secondary btn-sm">一覧を読み込む</button>
+          </div>
+          <div id="session-list">
+            <div class="empty-state">
+              <p>「一覧を読み込む」ボタンを押してください</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ダッシュボード本体（セッション選択後に表示） -->
+        <div id="dashboard-body" class="hidden">
+          <div class="dashboard-grid">
+            <!-- 左カラム: 提出状況 -->
+            <div>
+              <!-- 統計カード -->
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-number" id="stat-total">0</div>
+                  <div class="stat-label">参加者数</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number" id="stat-summary">0</div>
+                  <div class="stat-label">要約完了</div>
+                  <div class="stat-sub" id="stat-summary-pct"></div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number" id="stat-opinion">0</div>
+                  <div class="stat-label">Opinion完了</div>
+                  <div class="stat-sub" id="stat-opinion-pct"></div>
+                </div>
+              </div>
+
+              <!-- 提出状況テーブル -->
+              <div class="card mb-md">
+                <div class="panel-header">
+                  <span class="panel-title">📋 提出状況一覧</span>
+                </div>
+                <div style="overflow-x: auto;">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>スート</th>
+                        <th>数字</th>
+                        <th>要約</th>
+                        <th>Opinion</th>
+                        <th>立場</th>
+                      </tr>
+                    </thead>
+                    <tbody id="student-table-body">
+                      <tr><td colspan="5" class="text-center text-muted">データなし</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- 使用語句ランキング -->
+              <div class="card mb-md" id="terms-ranking-section">
+                <div class="panel-header">
+                  <span class="panel-title">🏷️ 使用語句ランキング</span>
+                </div>
+                <div id="terms-ranking" style="display: flex; flex-wrap: wrap; gap: 6px; padding-top: 4px;">
+                  <span class="text-muted" style="font-size: 13px;">提出待ち...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 右カラム: コントロール -->
+            <div>
+              <!-- 意見交換フェーズ切り替え -->
+              <div class="card mb-md">
+                <div class="panel-header">
+                  <span class="panel-title">🎯 意見交換フェーズ</span>
+                </div>
+                <div class="toggle-wrap" style="margin-bottom: 12px;">
+                  <input type="checkbox" class="toggle-input" id="toggle-exchange">
+                  <label class="toggle-track" for="toggle-exchange">
+                    <span class="toggle-thumb"></span>
+                  </label>
+                  <div>
+                    <div class="toggle-label" id="exchange-status-label">OFF</div>
+                    <div class="toggle-status">生徒の意見交換画面が切り替わります</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 立場分布グラフ -->
+              <div class="card mb-md" id="position-chart-card">
+                <div class="panel-header">
+                  <span class="panel-title">📊 立場の分布</span>
+                </div>
+                <div class="mini-bar-chart" id="mini-bar-chart">
+                  <span class="text-muted" style="font-size: 13px;">提出待ち...</span>
+                </div>
+              </div>
+
+              <!-- CSVエクスポート -->
+              <div class="card">
+                <div class="panel-header">
+                  <span class="panel-title">💾 データエクスポート</span>
+                </div>
+                <button id="btn-export-csv" class="btn btn-secondary btn-full">
+                  📥 CSVをダウンロード
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/teacher/auth.js"></script>
+  <script src="../js/teacher/export.js"></script>
+  <script src="../js/teacher/dashboard.js"></script>
+</body>
+</html>

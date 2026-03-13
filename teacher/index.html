@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>教師ログイン | ジグソー授業管理</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/teacher.css">
+</head>
+<body>
+  <div id="loading" class="hidden"><div class="spinner"></div></div>
+
+  <div class="teacher-login-wrap">
+    <div class="teacher-login-card">
+      <div class="login-title">📚 ジグソー授業管理</div>
+      <p class="login-subtitle">
+        Supabaseに登録した教師アカウントでログインしてください
+      </p>
+
+      <div id="error-message" class="alert alert-error hidden"></div>
+
+      <div class="form-group">
+        <label class="form-label" for="input-email">メールアドレス</label>
+        <input type="email" id="input-email" class="form-input" placeholder="teacher@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="input-password">パスワード</label>
+        <input type="password" id="input-password" class="form-input" placeholder="パスワード" autocomplete="current-password">
+      </div>
+      <button id="btn-login" class="btn btn-primary btn-full btn-lg" style="margin-top: 8px;">
+        ログイン
+      </button>
+
+      <p style="text-align: center; font-size: 12px; color: var(--color-text-muted); margin-top: 20px;">
+        生徒用ページは<a href="../index.html">こちら</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/teacher/auth.js"></script>
+</body>
+</html>

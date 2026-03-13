@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>エキスパート活動 | ジグソー授業</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/student.css">
+</head>
+<body>
+  <div id="loading" class="hidden"><div class="spinner"></div><p>読み込み中...</p></div>
+
+  <header class="student-header">
+    <span class="app-title">📚 ジグソー授業</span>
+    <span class="phase-label">エキスパート活動</span>
+    <span class="trump-badge" id="trump-badge">--</span>
+  </header>
+
+  <!-- 読み取り専用バナー -->
+  <div id="readonly-banner" class="readonly-banner hidden">
+    👁 閲覧モードです（編集できません）
+  </div>
+
+  <main class="student-main">
+    <div id="error-message" class="alert alert-error hidden"></div>
+    <div id="success-message" class="alert alert-success hidden"></div>
+
+    <!-- タイマー -->
+    <div class="section-block" id="timer-section">
+      <div class="timer-wrap">
+        <div class="timer-display" id="timer-display">--:--</div>
+        <div class="timer-label">エキスパート活動の残り時間</div>
+      </div>
+    </div>
+
+    <!-- 担当資料 -->
+    <div class="section-block">
+      <div class="section-title">
+        <span id="material-suit-label">📄</span> 担当資料
+      </div>
+      <div class="material-content" id="material-content">読み込み中...</div>
+    </div>
+
+    <!-- 要約入力 -->
+    <div class="section-block">
+      <div class="section-title">✏️ 要約（必須）</div>
+      <div class="form-group" style="margin-bottom: 8px;">
+        <label class="form-label" for="summary-input">
+          資料の内容を自分の言葉でまとめてください
+        </label>
+        <textarea id="summary-input" class="form-textarea" rows="6"
+          placeholder="この資料は…"></textarea>
+        <div class="char-count"><span id="summary-char-count">0</span>文字</div>
+      </div>
+    </div>
+
+    <!-- AIボタン群 -->
+    <div class="section-block">
+      <div class="section-title">🤖 AIサポート（任意）</div>
+      <div class="btn-group">
+        <button id="btn-ai-feedback" class="btn btn-outline btn-student">
+          💡 AIにフィードバックをもらう
+        </button>
+        <button id="btn-ai-explain" class="btn btn-outline btn-student">
+          🗣 AIに説明してみる
+        </button>
+      </div>
+      <p class="form-hint mt-sm">※ AIを使うには先に要約を入力してください</p>
+    </div>
+
+    <!-- 次へボタン -->
+    <div style="text-align: right; padding-bottom: 40px;">
+      <button id="btn-next" class="btn btn-success btn-lg btn-student" disabled>
+        Opinionシートへ →
+      </button>
+      <p class="form-hint mt-sm" id="next-hint">要約を入力してください</p>
+    </div>
+  </main>
+
+  <!-- AIフィードバックモーダル -->
+  <div id="modal-feedback" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 560px;">
+      <div class="modal-header">
+        <h3>💡 AIからのフィードバック</h3>
+        <button class="modal-close" data-close="modal-feedback">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="feedback-content" class="ai-feedback-text">読み込み中...</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close="modal-feedback">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 説明練習モーダル -->
+  <div id="modal-explain" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 600px; height: 90vh;">
+      <div class="modal-header">
+        <h3>🗣 AIに説明してみよう</h3>
+        <button class="modal-close" id="close-explain">×</button>
+      </div>
+      <div class="modal-body" style="padding: 0; flex: 1; display: flex; flex-direction: column;">
+        <div style="padding: 12px 16px; background: var(--color-bg); border-bottom: 1px solid var(--color-border); font-size: 13px; color: var(--color-text-muted);">
+          AIが生徒役になって質問します。資料の内容を説明してみましょう。
+        </div>
+        <div class="ai-chat" style="flex: 1; border: none; border-radius: 0;">
+          <div class="ai-chat-messages" id="chat-messages"></div>
+          <div class="ai-chat-footer">
+            <textarea id="chat-input" placeholder="ここに入力してEnterで送信..." rows="2"></textarea>
+            <button id="btn-chat-send" class="btn btn-primary">送信</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-close-explain">会話を終了して閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/claude-client.js"></script>
+  <script src="../js/student/expert.js"></script>
+</body>
+</html>
