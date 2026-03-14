@@ -1,0 +1,124 @@
+/* =============================================
+   共有活動ページ専用スタイル
+   ============================================= */
+
+/* メインエリアを広めに */
+.sharing-main {
+  max-width: 1100px;
+}
+
+/* ヘッダー行 */
+.sharing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.sharing-group-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.sharing-auto-refresh {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+/* 2カラムレイアウト */
+.sharing-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+  align-items: start;
+}
+
+/* 要約カード */
+.summary-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  background: var(--color-surface);
+  transition: border-color 0.2s;
+}
+
+.summary-card:last-child {
+  margin-bottom: 0;
+}
+
+.summary-card.my-suit {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.summary-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.summary-suit-label {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.summary-badge {
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: var(--border-radius-full);
+  background: var(--color-success);
+  color: white;
+  font-weight: 600;
+}
+
+.summary-badge.mine {
+  background: var(--color-primary);
+}
+
+.summary-text {
+  font-size: 16px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  color: var(--color-text);
+}
+
+.summary-pending {
+  font-size: 16px;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.summary-time {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: var(--spacing-sm);
+  text-align: right;
+}
+
+/* コピーボタン群 */
+.memo-copy-buttons {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+/* レスポンシブ */
+@media (max-width: 720px) {
+  .sharing-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sharing-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>共有活動 | ジグソー授業</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <link rel="stylesheet" href="../css/student.css">
+  <link rel="stylesheet" href="../css/sharing.css">
+</head>
+<body>
+  <div id="loading" class="hidden"><div class="spinner"></div><p>読み込み中...</p></div>
+
+  <header class="student-header">
+    <span class="app-title">📚 ジグソー授業</span>
+    <span class="phase-label">共有活動</span>
+    <span class="trump-badge" id="trump-badge">--</span>
+  </header>
+
+  <main class="student-main sharing-main">
+    <div id="error-message" class="alert alert-error hidden"></div>
+    <div id="success-message" class="alert alert-success hidden"></div>
+
+    <div class="sharing-header">
+      <h2 class="sharing-group-title">グループ <span id="group-number">--</span></h2>
+      <div class="sharing-auto-refresh">
+        <span id="refresh-status">30秒後に自動更新</span>
+        <button id="btn-refresh" class="btn btn-outline" style="font-size:14px; padding: 6px 14px;">今すぐ更新</button>
+      </div>
+    </div>
+
+    <div class="sharing-layout">
+      <!-- 左カラム：各スートの要約 -->
+      <div class="sharing-col-summaries">
+        <div class="section-block">
+          <div class="section-title">📋 各チームの要約</div>
+          <div id="summaries-list">
+            <p style="color: var(--color-text-muted);">読み込み中...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右カラム：共有メモ -->
+      <div class="sharing-col-memo">
+        <div class="section-block">
+          <div class="section-title">📝 共有メモ</div>
+          <p class="form-hint" style="margin-bottom: 10px;">グループで話し合った内容を自由にメモしよう</p>
+          <textarea id="memo-input" class="form-textarea" rows="10"
+            placeholder="例）&#10;・スペードチームの資料は労働者の苦境を示している&#10;・クラブチームは都市の衛生問題に注目&#10;・ハートチームは中産階級の恩恵を指摘&#10;&#10;→ 全体として「豊かさ」に格差があった？"></textarea>
+
+          <div class="memo-copy-buttons">
+            <button id="btn-copy-md" class="btn btn-outline" style="font-size:14px; padding: 6px 14px;">
+              📄 Markdown形式でコピー
+            </button>
+            <button id="btn-copy-text" class="btn btn-outline" style="font-size:14px; padding: 6px 14px;">
+              📋 テキスト形式でコピー
+            </button>
+          </div>
+        </div>
+
+        <div style="text-align: right; padding-bottom: 40px;">
+          <button id="btn-to-opinion" class="btn btn-success btn-lg btn-student">
+            意見をまとめる →
+          </button>
+          <p class="form-hint mt-sm">各チームの要約を参考に自分の意見を書こう</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/student/sharing.js"></script>
+</body>
+</html>

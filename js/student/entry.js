@@ -268,8 +268,8 @@
       // Opinion提出済み → 意見交換へ
       window.location.href = 'student/exchange.html';
     } else if (session.summary_submitted_at) {
-      // 要約提出済み → Opinionへ
-      window.location.href = 'student/opinion.html';
+      // 要約提出済み → 共有活動へ
+      window.location.href = 'student/sharing.html';
     } else {
       // まだエキスパート活動
       window.location.href = 'student/expert.html';

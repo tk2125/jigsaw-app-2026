@@ -241,6 +241,17 @@ window.DB = {
     }
   },
 
+  // 同じグループ番号のすべてのスートの要約を取得（共有活動用）
+  async getSummariesByGroup(lessonSessionId, cardNumber) {
+    const { data, error } = await this._sb
+      .from('student_sessions')
+      .select('suit, summary_text, summary_submitted_at')
+      .eq('lesson_session_id', lessonSessionId)
+      .eq('card_number', parseInt(cardNumber));
+    if (error) throw error;
+    return data || [];
+  },
+
   // 立場の集計
   async getPositionStats(lessonSessionId) {
     const { data, error } = await this._sb

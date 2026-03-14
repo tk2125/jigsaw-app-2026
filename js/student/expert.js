@@ -149,7 +149,7 @@
         const sessionId = sessionStorage.getItem(Utils.SESSION_KEYS.SESSION_ID);
         await DB.submitSummary(sessionId, summaryText);
         if (timerInterval) clearInterval(timerInterval);
-        window.location.href = 'opinion.html';
+        window.location.href = 'sharing.html';
       } catch (err) {
         Utils.showError('保存に失敗しました: ' + err.message);
       } finally {
@@ -281,6 +281,14 @@
   // モーダル
   // =============================================
   function setupModalHandlers() {
+    // ホームグループへ戻るボタン
+    document.getElementById('btn-to-sharing').addEventListener('click', () => {
+      const suit = sessionStorage.getItem(Utils.SESSION_KEYS.SUIT);
+      const cardNumber = sessionStorage.getItem(Utils.SESSION_KEYS.CARD_NUMBER);
+      const params = new URLSearchParams({ suit, group: cardNumber });
+      window.location.href = `sharing.html?${params.toString()}`;
+    });
+
     // 汎用クローズボタン
     document.querySelectorAll('[data-close]').forEach(btn => {
       btn.addEventListener('click', () => {
