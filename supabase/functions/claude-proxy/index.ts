@@ -73,6 +73,15 @@ serve(async (req) => {
           content: `【中心発問】\n${payload.centralQuestion}\n\n【選んだ立場】\n${payload.positionChoice}\n\n${usedTermsList}\n\n【生徒の意見文】\n${payload.opinionText}`,
         },
       ];
+    } else if (type === "copy_check") {
+      // コピペ判定
+      systemPrompt = `あなたは高校の教師です。生徒の要約が資料をほぼそのままコピーしているかどうかを判定してください。必ずJSON形式のみで回答し、他のテキストは一切含めないでください。`;
+      messages = [
+        {
+          role: "user",
+          content: `以下の【資料】と【生徒の要約】を比較してください。\n生徒の要約が資料をほぼそのままコピーしている場合は {"copied": true, "feedback": "アドバイス文"} を返してください。\n自分の言葉でまとめられていれば {"copied": false, "feedback": ""} を返してください。\nfeedbackは生徒への優しい一言アドバイス（30字以内）にしてください。\n\n【資料】\n${payload.materialContent}\n\n【生徒の要約】\n${payload.summaryText}`,
+        },
+      ];
     } else {
       return new Response(JSON.stringify({ error: "Unknown type" }), {
         status: 400,

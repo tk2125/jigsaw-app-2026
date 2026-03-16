@@ -144,6 +144,34 @@
         return;
       }
 
+      const btn = document.getElementById('btn-next');
+      const warning = document.getElementById('copy-check-warning');
+      warning.classList.add('hidden');
+
+      // コピペチェック
+      btn.disabled = true;
+      btn.textContent = '確認中...';
+
+      try {
+        const suit = sessionStorage.getItem(Utils.SESSION_KEYS.SUIT);
+        const materialContent = lessonData.materials[suit] || '';
+        const result = await ClaudeAPI.checkCopyPaste(summaryText, materialContent);
+
+        if (result.copied) {
+          warning.classList.remove('hidden');
+          document.getElementById('copy-check-feedback').textContent = result.feedback;
+          btn.disabled = false;
+          btn.textContent = '共有活動へ →';
+          warning.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+      } catch (err) {
+        // チェック失敗時は通過させる
+        console.warn('コピペチェックエラー:', err.message);
+      }
+
+      // 通常送信処理
+      btn.textContent = '送信中...';
       Utils.setLoading(true);
       try {
         const sessionId = sessionStorage.getItem(Utils.SESSION_KEYS.SESSION_ID);
@@ -152,6 +180,8 @@
         window.location.href = 'sharing.html';
       } catch (err) {
         Utils.showError('保存に失敗しました: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = '共有活動へ →';
       } finally {
         Utils.setLoading(false);
       }

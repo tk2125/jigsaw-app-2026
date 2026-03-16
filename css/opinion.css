@@ -1,0 +1,39 @@
+/* =============================================
+   Opinionシートページ専用スタイル
+   ============================================= */
+
+.opinion-main {
+  max-width: 1100px;
+}
+
+/* 2カラムレイアウト */
+.opinion-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: var(--spacing-lg);
+  align-items: start;
+}
+
+/* 左カラム：共有メモ（読み取り専用） */
+.sharing-memo-readonly {
+  background: #f5f5f5;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  font-size: 15px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  color: var(--color-text);
+  min-height: 160px;
+}
+
+.sharing-memo-empty {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* レスポンシブ：モバイルは縦並び（共有メモ上、入力欄下） */
+@media (max-width: 720px) {
+  .opinion-layout {
+    grid-template-columns: 1fr;
+  }
+}

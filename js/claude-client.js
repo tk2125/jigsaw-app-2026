@@ -34,6 +34,16 @@ window.ClaudeAPI = {
     return this._call('explanation_continue', { messages });
   },
 
+  // コピペ判定
+  async checkCopyPaste(summaryText, materialContent) {
+    const raw = await this._call('copy_check', { summaryText, materialContent });
+    try {
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      if (jsonMatch) return JSON.parse(jsonMatch[0]);
+    } catch (_) {}
+    return { copied: false, feedback: '' };
+  },
+
   // Opinionへのフィードバック
   async getOpinionFeedback({ opinionText, positionChoice, centralQuestion, requiredTerms, rubricLogicCriteria, rubricSourceCriteria, usedTerms }) {
     return this._call('opinion_feedback', {

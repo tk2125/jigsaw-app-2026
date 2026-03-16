@@ -45,6 +45,14 @@
     const cardNum = sessionStorage.getItem(Utils.SESSION_KEYS.CARD_NUMBER);
     const lesson = lessonData.lesson;
 
+    // 共有メモの表示
+    const sharingMemo = sessionStorage.getItem('jigsaw_sharing_memo');
+    const memoDisplay = document.getElementById('sharing-memo-display');
+    if (sharingMemo && sharingMemo.trim()) {
+      memoDisplay.textContent = sharingMemo;
+      memoDisplay.classList.remove('sharing-memo-empty');
+    }
+
     // ヘッダー
     const badge = document.getElementById('trump-badge');
     badge.textContent = `${suit} ${Utils.cardNumberToLabel(cardNum)}`;
