@@ -152,12 +152,16 @@
       btn.disabled = true;
       btn.textContent = '確認中...';
 
+      console.log('[expert.js] コピペチェック開始');
       try {
         const suit = sessionStorage.getItem(Utils.SESSION_KEYS.SUIT);
         const materialContent = lessonData.materials[suit] || '';
+        console.log('[expert.js] suit:', suit, '/ materialContent length:', materialContent.length);
         const result = await ClaudeAPI.checkCopyPaste(summaryText, materialContent);
+        console.log('[expert.js] checkCopyPaste result:', result);
 
         if (result.copied) {
+          console.log('[expert.js] コピペ検出 → 送信ブロック');
           warning.classList.remove('hidden');
           document.getElementById('copy-check-feedback').textContent = result.feedback;
           btn.disabled = false;
@@ -165,9 +169,10 @@
           warning.scrollIntoView({ behavior: 'smooth', block: 'center' });
           return;
         }
+        console.log('[expert.js] コピペなし → 通常送信へ');
       } catch (err) {
         // チェック失敗時は通過させる
-        console.warn('コピペチェックエラー:', err.message);
+        console.error('[expert.js] コピペチェック例外（通過）:', err);
       }
 
       // 通常送信処理

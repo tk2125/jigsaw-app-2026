@@ -36,11 +36,26 @@ window.ClaudeAPI = {
 
   // コピペ判定
   async checkCopyPaste(summaryText, materialContent) {
-    const raw = await this._call('copy_check', { summaryText, materialContent });
+    console.log('[checkCopyPaste] 開始', { summaryLength: summaryText.length, materialLength: materialContent.length });
+    let raw;
+    try {
+      raw = await this._call('copy_check', { summaryText, materialContent });
+      console.log('[checkCopyPaste] Edge Function レスポンス raw:', raw);
+    } catch (err) {
+      console.error('[checkCopyPaste] _call エラー:', err);
+      return { copied: false, feedback: '' };
+    }
     try {
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
-      if (jsonMatch) return JSON.parse(jsonMatch[0]);
-    } catch (_) {}
+      if (jsonMatch) {
+        const result = JSON.parse(jsonMatch[0]);
+        console.log('[checkCopyPaste] パース結果:', result);
+        return result;
+      }
+      console.warn('[checkCopyPaste] JSONが見つからない。raw=', raw);
+    } catch (err) {
+      console.error('[checkCopyPaste] JSONパースエラー:', err, 'raw=', raw);
+    }
     return { copied: false, feedback: '' };
   },
 
