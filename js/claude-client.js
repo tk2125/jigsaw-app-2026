@@ -42,8 +42,9 @@ window.ClaudeAPI = {
       raw = await this._call('copy_check', { summaryText, materialContent });
       console.log('[checkCopyPaste] Edge Function レスポンス raw:', raw);
     } catch (err) {
-      console.error('[checkCopyPaste] _call エラー:', err);
-      return { copied: false, feedback: '' };
+      console.error('[checkCopyPaste] エラー詳細:', err);
+      console.error('[checkCopyPaste] スタック:', err.stack);
+      return { copied: true, feedback: 'AIチェック中にエラーが発生しました。しばらくしてから再試行してください。（開発者確認用：' + err.message + '）' };
     }
     try {
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
