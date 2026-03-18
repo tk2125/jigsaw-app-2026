@@ -382,9 +382,10 @@ window.DB = {
   },
 
   async createLesson(data) {
+    const { data: { session } } = await this._sb.auth.getSession();
     const { data: created, error } = await this._sb
       .from('lessons')
-      .insert(data)
+      .insert({ ...data, teacher_id: session?.user?.id })
       .select()
       .single();
     if (error) throw error;

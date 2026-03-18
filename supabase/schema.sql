@@ -197,3 +197,49 @@ CREATE POLICY "anon_all_exchange_likes" ON exchange_likes
   FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "auth_all_exchange_likes" ON exchange_likes
   FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- ===========================================
+-- マイグレーション: teacher_id・entry_message追加 & RLS更新
+-- Supabase ダッシュボード → SQL Editor で実行してください
+-- ===========================================
+
+-- lessonsにteacher_idとentry_messageを追加
+ALTER TABLE lessons ADD COLUMN IF NOT EXISTS teacher_id UUID REFERENCES auth.users(id);
+ALTER TABLE lessons ADD COLUMN IF NOT EXISTS entry_message TEXT NOT NULL DEFAULT '';
+
+-- 注意: 既存授業データのteacher_idはNULLになります。
+-- 引き継ぐ場合は以下で手動更新してください（UUIDはダッシュボード → Authentication → Users で確認）:
+-- UPDATE lessons SET teacher_id = '<your-user-uuid>' WHERE teacher_id IS NULL;
+
+-- 既存の教師用全操作ポリシーを削除し、teacher_idベースに変更
+DROP POLICY IF EXISTS "auth_all_lessons" ON lessons;
+CREATE POLICY "auth_select_own_lessons" ON lessons
+  FOR SELECT TO authenticated USING (auth.uid() = teacher_id);
+CREATE POLICY "auth_insert_own_lessons" ON lessons
+  FOR INSERT TO authenticated WITH CHECK (auth.uid() = teacher_id);
+CREATE POLICY "auth_update_own_lessons" ON lessons
+  FOR UPDATE TO authenticated USING (auth.uid() = teacher_id) WITH CHECK (auth.uid() = teacher_id);
+CREATE POLICY "auth_delete_own_lessons" ON lessons
+  FOR DELETE TO authenticated USING (auth.uid() = teacher_id);
+
+-- lesson_materials: 自分のlessonに紐づくもののみ
+DROP POLICY IF EXISTS "auth_all_lesson_materials" ON lesson_materials;
+CREATE POLICY "auth_crud_own_lesson_materials" ON lesson_materials
+  FOR ALL TO authenticated
+  USING (EXISTS (
+    SELECT 1 FROM lessons WHERE lessons.id = lesson_materials.lesson_id AND lessons.teacher_id = auth.uid()
+  ))
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM lessons WHERE lessons.id = lesson_materials.lesson_id AND lessons.teacher_id = auth.uid()
+  ));
+
+-- lesson_sessions: 自分のlessonに紐づくもののみ
+DROP POLICY IF EXISTS "auth_all_lesson_sessions" ON lesson_sessions;
+CREATE POLICY "auth_crud_own_lesson_sessions" ON lesson_sessions
+  FOR ALL TO authenticated
+  USING (EXISTS (
+    SELECT 1 FROM lessons WHERE lessons.id = lesson_sessions.lesson_id AND lessons.teacher_id = auth.uid()
+  ))
+  WITH CHECK (EXISTS (
+    SELECT 1 FROM lessons WHERE lessons.id = lesson_sessions.lesson_id AND lessons.teacher_id = auth.uid()
+  ));

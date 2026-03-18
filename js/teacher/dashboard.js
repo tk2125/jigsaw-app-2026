@@ -6,6 +6,7 @@
   let selectedLessonName = '';
   let autoRefreshInterval = null;
   let exchangePhaseOn = false;
+  let studentsData = [];
 
   const REFRESH_INTERVAL_MS = 20000; // 20秒
 
@@ -48,6 +49,14 @@
     document.getElementById('btn-export-csv').addEventListener('click', () => {
       if (!selectedSessionId) return;
       TeacherExport.exportCSV(selectedSessionId, selectedLessonName);
+    });
+
+    // 生徒詳細モーダルを閉じる
+    document.getElementById('modal-close').addEventListener('click', () => {
+      document.getElementById('student-detail-modal').classList.add('hidden');
+    });
+    document.getElementById('student-detail-modal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) e.currentTarget.classList.add('hidden');
     });
   }
 
@@ -211,12 +220,13 @@
       return;
     }
 
-    tbody.innerHTML = students.map(s => {
+    studentsData = students;
+    tbody.innerHTML = students.map((s, i) => {
       const suitColor = Utils.suitToColor(s.suit);
       const summaryOk = s.summary_submitted_at;
       const opinionOk = s.opinion_submitted_at;
       return `
-        <tr>
+        <tr class="clickable-row" data-index="${i}" title="クリックで詳細を表示">
           <td class="suit-cell" style="color: ${suitColor};">${s.suit}${s.is_joker ? ' 🃏' : ''}</td>
           <td>${Utils.cardNumberToLabel(s.card_number)}</td>
           <td class="check-cell">${summaryOk ? '<span style="color:var(--color-success);">✓</span>' : '<span style="color:var(--color-border);">—</span>'}</td>
@@ -225,6 +235,27 @@
         </tr>
       `;
     }).join('');
+
+    tbody.querySelectorAll('.clickable-row').forEach(row => {
+      row.addEventListener('click', () => {
+        showStudentDetail(studentsData[parseInt(row.dataset.index)]);
+      });
+    });
+  }
+
+  function showStudentDetail(student) {
+    const modal = document.getElementById('student-detail-modal');
+    document.getElementById('modal-title').textContent =
+      `${student.suit}${student.is_joker ? ' 🃏' : ''} ${Utils.cardNumberToLabel(student.card_number)} の提出内容`;
+    document.getElementById('modal-position').textContent =
+      student.position_choice || '（未回答）';
+    document.getElementById('modal-terms').textContent =
+      student.required_terms_used?.length ? student.required_terms_used.join('、') : '（なし）';
+    document.getElementById('modal-summary').textContent =
+      student.summary_text || '（未提出）';
+    document.getElementById('modal-opinion').textContent =
+      student.opinion_text || '（未提出）';
+    modal.classList.remove('hidden');
   }
 
   function renderTermsRanking(termCounts) {

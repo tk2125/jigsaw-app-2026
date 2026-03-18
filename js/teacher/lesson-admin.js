@@ -234,6 +234,7 @@
     document.getElementById('field-rubric-logic').value = '';
     document.getElementById('field-rubric-source').value = '';
     document.getElementById('field-timer').value = '15';
+    document.getElementById('field-entry-message').value = '';
     document.getElementById('session-list-in-form').innerHTML = '<p class="text-muted" style="font-size: 13px;">まず授業を保存してから実施クラスを追加できます</p>';
 
     // ラジオをリセット
@@ -275,6 +276,7 @@
       document.getElementById('field-rubric-logic').value = lesson.rubric_logic_criteria || '';
       document.getElementById('field-rubric-source').value = lesson.rubric_source_criteria || '';
       document.getElementById('field-timer').value = lesson.expert_timer_minutes || 15;
+      document.getElementById('field-entry-message').value = lesson.entry_message || '';
 
       // スート数
       currentSuitCount = lesson.suit_count;
@@ -353,6 +355,7 @@
       rubric_logic_criteria: document.getElementById('field-rubric-logic').value.trim(),
       rubric_source_criteria: document.getElementById('field-rubric-source').value.trim(),
       expert_timer_minutes: parseInt(document.getElementById('field-timer').value) || 15,
+      entry_message: document.getElementById('field-entry-message').value.trim(),
       remainder_type: remainderType,
       priority_suit: remainderType === 'priority_suit' ? document.getElementById('field-priority-suit').value : null,
     };

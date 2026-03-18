@@ -58,6 +58,7 @@
     document.getElementById('btn-trump-back').addEventListener('click', () => {
       document.getElementById('step-trump').classList.add('hidden');
       document.getElementById('step-password').classList.remove('hidden');
+      document.getElementById('entry-message-banner').classList.add('hidden');
       selectedSuit = null;
       foundLesson = null;
     });
@@ -124,6 +125,15 @@
       // suit_count=3 の場合、♢ボタンを無効化（ただし後でジョーカー処理で使うかも）
       // スートボタンの表示制御はここで行う
       updateSuitButtons(result.lesson.suit_count);
+
+      // entry_messageがあれば表示
+      const banner = document.getElementById('entry-message-banner');
+      if (result.lesson.entry_message) {
+        banner.textContent = result.lesson.entry_message;
+        banner.classList.remove('hidden');
+      } else {
+        banner.classList.add('hidden');
+      }
 
       // トランプ入力ステップへ
       document.getElementById('step-password').classList.add('hidden');

@@ -44,6 +44,26 @@ window.TeacherAuth = {
     }
     return true;
   },
+
+  // パスワードリセットメール送信
+  async handlePasswordReset(email) {
+    if (!email) {
+      Utils.showError('メールアドレスを入力してからクリックしてください');
+      return;
+    }
+    Utils.setLoading(true);
+    try {
+      const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/teacher/index.html',
+      });
+      if (error) throw error;
+      Utils.showSuccess('パスワードリセットのメールを送信しました。メールをご確認ください。');
+    } catch (err) {
+      Utils.showError('送信に失敗しました: ' + (err.message || 'エラー'));
+    } finally {
+      Utils.setLoading(false);
+    }
+  },
 };
 
 // =============================================
@@ -66,4 +86,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('input-password').addEventListener('keydown', e => {
     if (e.key === 'Enter') TeacherAuth.handleLogin();
   });
+
+  const resetLink = document.getElementById('link-reset-password');
+  if (resetLink) {
+    resetLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('input-email')?.value?.trim();
+      TeacherAuth.handlePasswordReset(email);
+    });
+  }
 });
