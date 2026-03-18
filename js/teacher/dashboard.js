@@ -6,6 +6,7 @@
   let selectedLessonName = '';
   let autoRefreshInterval = null;
   let exchangePhaseOn = false;
+  let sharingPublicOn = false;
   let studentsData = [];
 
   const REFRESH_INTERVAL_MS = 20000; // 20秒
@@ -39,6 +40,24 @@
         Utils.showSuccess(`意見交換フェーズを${enabled ? 'ON' : 'OFF'}にしました`);
       } catch (err) {
         e.target.checked = !enabled; // 元に戻す
+        Utils.showError('切り替えに失敗しました: ' + err.message);
+      } finally {
+        Utils.setLoading(false);
+      }
+    });
+
+    // 共有活動公開トグル
+    document.getElementById('toggle-sharing-public').addEventListener('change', async (e) => {
+      if (!selectedSessionId) return;
+      const enabled = e.target.checked;
+      Utils.setLoading(true);
+      try {
+        await DB.setSharingPublic(selectedSessionId, enabled);
+        sharingPublicOn = enabled;
+        updateSharingPublicUI(enabled);
+        Utils.showSuccess(`共有活動公開を${enabled ? 'ON（全グループ公開）' : 'OFF（グループ内のみ）'}にしました`);
+      } catch (err) {
+        e.target.checked = !enabled;
         Utils.showError('切り替えに失敗しました: ' + err.message);
       } finally {
         Utils.setLoading(false);
@@ -178,6 +197,11 @@
       document.getElementById('toggle-exchange').checked = exchangePhaseOn;
       updateExchangeToggleUI(exchangePhaseOn);
 
+      // 共有活動公開状態を反映
+      sharingPublicOn = status.sharing_public || false;
+      document.getElementById('toggle-sharing-public').checked = sharingPublicOn;
+      updateSharingPublicUI(sharingPublicOn);
+
       // 統計
       renderStats(dashData);
 
@@ -302,6 +326,12 @@
   function updateExchangeToggleUI(enabled) {
     const label = document.getElementById('exchange-status-label');
     label.textContent = enabled ? 'ON（開催中）' : 'OFF';
+    label.style.color = enabled ? 'var(--color-success)' : 'var(--color-text-muted)';
+  }
+
+  function updateSharingPublicUI(enabled) {
+    const label = document.getElementById('sharing-public-status-label');
+    label.textContent = enabled ? 'ON（全グループ公開）' : 'OFF（グループ内のみ）';
     label.style.color = enabled ? 'var(--color-success)' : 'var(--color-text-muted)';
   }
 

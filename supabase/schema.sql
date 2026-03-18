@@ -199,6 +199,32 @@ CREATE POLICY "auth_all_exchange_likes" ON exchange_likes
   FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 -- ===========================================
+-- マイグレーション: 共有活動掲示板機能
+-- Supabase SQL Editorで実行してください
+-- ===========================================
+
+ALTER TABLE lesson_sessions ADD COLUMN IF NOT EXISTS sharing_public BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE lessons ADD COLUMN IF NOT EXISTS sharing_mode TEXT NOT NULL DEFAULT 'full';
+ALTER TABLE lesson_materials ADD COLUMN IF NOT EXISTS keywords TEXT[] NOT NULL DEFAULT '{}';
+
+CREATE TABLE IF NOT EXISTS sharing_posts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  lesson_session_id UUID REFERENCES lesson_sessions(id) ON DELETE CASCADE,
+  card_number INTEGER NOT NULL,
+  suit TEXT NOT NULL,
+  post_type TEXT NOT NULL CHECK (post_type IN ('question', 'note', 'expert_reply')),
+  content TEXT NOT NULL,
+  target_suit TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE sharing_posts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "anon_all_sharing_posts" ON sharing_posts
+  FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "auth_all_sharing_posts" ON sharing_posts
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- ===========================================
 -- マイグレーション: teacher_id・entry_message追加 & RLS更新
 -- Supabase ダッシュボード → SQL Editor で実行してください
 -- ===========================================

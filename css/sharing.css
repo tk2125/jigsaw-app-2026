@@ -2,7 +2,7 @@
    共有活動ページ専用スタイル
    ============================================= */
 
-/* メインエリアを広めに */
+/* メインエリア */
 .sharing-main {
   max-width: 1100px;
 }
@@ -12,7 +12,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
   flex-wrap: wrap;
   gap: var(--spacing-sm);
 }
@@ -31,88 +31,295 @@
   color: var(--color-text-muted);
 }
 
-/* 2カラムレイアウト */
+/* =============================================
+   スートタブ
+   ============================================= */
+.suit-tab-row {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--color-border);
+  margin-bottom: var(--spacing-lg);
+  overflow-x: auto;
+}
+
+.suit-tab-btn {
+  padding: 10px 24px;
+  font-size: 18px;
+  font-weight: 700;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.15s;
+  font-family: inherit;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-muted);
+}
+
+.suit-tab-btn:hover {
+  background: var(--color-bg);
+}
+
+.suit-tab-btn.active {
+  border-bottom-color: currentColor;
+  color: var(--color-text) !important;
+  background: var(--color-bg);
+}
+
+.my-suit-mark {
+  font-size: 11px;
+  background: var(--color-primary);
+  color: white;
+  padding: 1px 7px;
+  border-radius: var(--border-radius-full);
+  font-weight: 600;
+}
+
+/* =============================================
+   2カラムレイアウト
+   ============================================= */
 .sharing-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 340px;
   gap: var(--spacing-lg);
   align-items: start;
 }
 
-/* 要約カード */
-.summary-card {
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-lg);
-  padding: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-  background: var(--color-surface);
-  transition: border-color 0.2s;
+/* =============================================
+   要約表示エリア
+   ============================================= */
+.summary-display {
+  padding: 14px 16px;
+  border-radius: var(--border-radius);
+  background: var(--color-bg);
+  margin-bottom: 4px;
 }
 
-.summary-card:last-child {
-  margin-bottom: 0;
-}
-
-.summary-card.my-suit {
-  border-color: var(--color-primary);
+.summary-display.is-mine {
   background: var(--color-primary-light);
 }
 
-.summary-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--spacing-sm);
-}
-
-.summary-suit-label {
-  font-size: 17px;
-  font-weight: 700;
-}
-
-.summary-badge {
-  font-size: 11px;
-  padding: 2px 10px;
-  border-radius: var(--border-radius-full);
-  background: var(--color-success);
-  color: white;
-  font-weight: 600;
-}
-
-.summary-badge.mine {
-  background: var(--color-primary);
-}
-
-.summary-text {
+.summary-display-text {
   font-size: 16px;
   line-height: 1.75;
   white-space: pre-wrap;
   color: var(--color-text);
+  user-select: none; /* コピペ対策 */
+  -webkit-user-select: none;
 }
 
 .summary-pending {
-  font-size: 16px;
+  font-size: 15px;
   color: var(--color-text-muted);
   font-style: italic;
+  padding: 12px 0;
 }
 
 .summary-time {
   font-size: 12px;
   color: var(--color-text-muted);
-  margin-top: var(--spacing-sm);
+  margin-top: 8px;
   text-align: right;
 }
 
-/* コピーボタン群 */
-.memo-copy-buttons {
-  display: flex;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-sm);
-  flex-wrap: wrap;
+/* =============================================
+   投稿一覧
+   ============================================= */
+.post-item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: var(--color-surface);
 }
 
-/* レスポンシブ */
-@media (max-width: 720px) {
+.post-item:last-child {
+  margin-bottom: 0;
+}
+
+.post-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.post-meta {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.post-content {
+  font-size: 15px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  color: var(--color-text);
+}
+
+/* =============================================
+   投稿タイプバッジ（sharing.html + opinion.html で共有）
+   ============================================= */
+.post-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: var(--border-radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.type-question {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.type-note {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.type-expert {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* =============================================
+   投稿フォーム
+   ============================================= */
+.post-type-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.post-type-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-border);
+  transition: background 0.15s;
+}
+
+.post-type-label:hover {
+  background: var(--color-bg);
+}
+
+.post-type-label:has(input:checked) {
+  background: var(--color-bg);
+  border-color: var(--color-primary);
+}
+
+.post-type-desc {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+/* =============================================
+   opinion.html 内の共有投稿パネル
+   ============================================= */
+.sharing-panel-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.sharing-panel-toggle {
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  color: var(--color-text);
+  font-family: inherit;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.15s;
+}
+
+.sharing-panel-toggle:hover {
+  background: #e2e8f0;
+}
+
+.sharing-panel-body {
+  border: 1px solid var(--color-border);
+  border-top: none;
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+  padding: 14px;
+  background: var(--color-surface);
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.sharing-suit-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sp-filter-btn {
+  padding: 4px 12px;
+  font-size: 13px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-full);
+  background: white;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.sp-filter-btn.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.sp-post-item {
+  border-left: 3px solid var(--color-border);
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  background: var(--color-bg);
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+}
+
+.sp-post-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.sp-post-meta {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.sp-post-content {
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  color: var(--color-text);
+}
+
+/* =============================================
+   レスポンシブ
+   ============================================= */
+@media (max-width: 800px) {
   .sharing-layout {
     grid-template-columns: 1fr;
   }
@@ -120,5 +327,10 @@
   .sharing-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .suit-tab-btn {
+    padding: 8px 14px;
+    font-size: 16px;
   }
 }

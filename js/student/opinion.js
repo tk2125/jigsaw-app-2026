@@ -30,6 +30,7 @@
       sessionData = await DB.getStudentSessionById(sessionId);
       renderPage();
       setupEventListeners();
+      setupSharingPanel();
     } catch (err) {
       Utils.showError('データの読み込みに失敗しました: ' + err.message);
     } finally {
@@ -44,14 +45,6 @@
     const suit = sessionStorage.getItem(Utils.SESSION_KEYS.SUIT);
     const cardNum = sessionStorage.getItem(Utils.SESSION_KEYS.CARD_NUMBER);
     const lesson = lessonData.lesson;
-
-    // 共有メモの表示
-    const sharingMemo = sessionStorage.getItem('jigsaw_sharing_memo');
-    const memoDisplay = document.getElementById('sharing-memo-display');
-    if (sharingMemo && sharingMemo.trim()) {
-      memoDisplay.textContent = sharingMemo;
-      memoDisplay.classList.remove('sharing-memo-empty');
-    }
 
     // ヘッダー
     const badge = document.getElementById('trump-badge');
@@ -347,5 +340,91 @@
 
   function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
   function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+  // =============================================
+  // 共有活動パネル
+  // =============================================
+  function setupSharingPanel() {
+    const SUITS_ALL = ['♤', '♧', '♡', '♢'];
+    const suit = sessionStorage.getItem(Utils.SESSION_KEYS.SUIT);
+    const cardNumber = parseInt(sessionStorage.getItem(Utils.SESSION_KEYS.CARD_NUMBER));
+    const lessonSessionId = sessionStorage.getItem(Utils.SESSION_KEYS.LESSON_SESSION_ID);
+    const suitCount = lessonData?.lesson?.suit_count || 3;
+    const suits = suitCount === 4 ? SUITS_ALL : SUITS_ALL.slice(0, 3);
+
+    let isPublic = false;
+    let activeSuit = suit;
+    let panelOpened = false;
+
+    const toggleBtn = document.getElementById('sharing-panel-toggle');
+    const panelBody = document.getElementById('sharing-panel-body');
+    const toggleIcon = document.getElementById('sharing-toggle-icon');
+
+    toggleBtn.addEventListener('click', async () => {
+      const isHidden = panelBody.classList.contains('hidden');
+      panelBody.classList.toggle('hidden', !isHidden);
+      if (toggleIcon) toggleIcon.textContent = isHidden ? '▲' : '▼';
+
+      if (isHidden && !panelOpened) {
+        panelOpened = true;
+        try {
+          const status = await DB.getLessonSessionStatus(lessonSessionId);
+          isPublic = status.sharing_public || false;
+        } catch (e) {}
+        renderSuitFilters();
+        await loadAndRenderPosts();
+      }
+    });
+
+    function renderSuitFilters() {
+      const filterArea = document.getElementById('sharing-suit-filter');
+      filterArea.innerHTML = suits.map(s => `
+        <button class="sp-filter-btn ${s === activeSuit ? 'active' : ''}" data-suit="${s}"
+          style="color: ${Utils.suitToColor(s)};">
+          ${s} ${Utils.suitToName(s)}
+        </button>
+      `).join('');
+
+      filterArea.querySelectorAll('.sp-filter-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          activeSuit = btn.dataset.suit;
+          filterArea.querySelectorAll('.sp-filter-btn').forEach(b => {
+            b.classList.toggle('active', b === btn);
+          });
+          await loadAndRenderPosts();
+        });
+      });
+    }
+
+    async function loadAndRenderPosts() {
+      const list = document.getElementById('sharing-posts-list');
+      list.innerHTML = '<p style="font-size:13px; color:var(--color-text-muted);">読み込み中...</p>';
+      try {
+        const posts = await DB.getSharingPosts(lessonSessionId, cardNumber, isPublic, activeSuit);
+        if (posts.length === 0) {
+          list.innerHTML = '<p style="font-size:13px; color:var(--color-text-muted);">投稿がありません</p>';
+          return;
+        }
+        const typeLabel = { question: '質問', note: 'メモ追記', expert_reply: 'エキスパート回答' };
+        const typeClass = { question: 'type-question', note: 'type-note', expert_reply: 'type-expert' };
+        list.innerHTML = posts.map(p => {
+          const groupInfo = isPublic
+            ? `グループ${Utils.cardNumberToLabel(p.card_number)} / ${Utils.suitToName(p.suit)}`
+            : Utils.suitToName(p.suit);
+          return `
+            <div class="sp-post-item">
+              <div class="sp-post-header">
+                <span class="post-type-badge ${typeClass[p.post_type] || ''}">${typeLabel[p.post_type] || p.post_type}</span>
+                <span class="sp-post-meta">${groupInfo} · ${Utils.formatTime(p.created_at)}</span>
+              </div>
+              <div class="sp-post-content">${Utils._escapeHtml(p.content)}</div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        list.innerHTML = '<p style="font-size:13px; color:var(--color-text-muted);">読み込みエラー</p>';
+      }
+    }
+  }
 
 })();

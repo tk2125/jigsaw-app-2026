@@ -29,40 +29,64 @@
       </div>
     </div>
 
+    <!-- スートタブ -->
+    <div class="suit-tab-row" id="suit-tab-row">
+      <!-- JSで描画 -->
+    </div>
+
     <div class="sharing-layout">
-      <!-- 左カラム：各スートの要約 -->
-      <div class="sharing-col-summaries">
+      <!-- 左カラム：要約 + 投稿一覧 -->
+      <div class="sharing-col-left">
         <div class="section-block">
-          <div class="section-title">📋 各チームの要約</div>
-          <div id="summaries-list">
-            <p style="color: var(--color-text-muted);">読み込み中...</p>
+          <div class="section-title">📋 要約</div>
+          <div id="active-summary-area">
+            <p class="text-muted">上のタブでスートを選んでください</p>
+          </div>
+        </div>
+        <div class="section-block">
+          <div class="section-title">💬 投稿一覧</div>
+          <div id="posts-list">
+            <p class="text-muted" style="font-size:14px;">読み込み中...</p>
           </div>
         </div>
       </div>
 
-      <!-- 右カラム：共有メモ -->
-      <div class="sharing-col-memo">
+      <!-- 右カラム：投稿フォーム + 次へ -->
+      <div class="sharing-col-right">
         <div class="section-block">
-          <div class="section-title">📝 共有メモ</div>
-          <p class="form-hint" style="margin-bottom: 10px;">グループで話し合った内容を自由にメモしよう</p>
-          <textarea id="memo-input" class="form-textarea" rows="10"
-            placeholder="例）&#10;・スペードチームの資料は労働者の苦境を示している&#10;・クラブチームは都市の衛生問題に注目&#10;・ハートチームは中産階級の恩恵を指摘&#10;&#10;→ 全体として「豊かさ」に格差があった？"></textarea>
+          <div class="section-title">✍️ 投稿する</div>
+          <p class="form-hint" style="margin-bottom: 12px;">表示中のスートへの投稿になります</p>
 
-          <div class="memo-copy-buttons">
-            <button id="btn-copy-md" class="btn btn-outline" style="font-size:14px; padding: 6px 14px;">
-              📄 Markdown形式でコピー
-            </button>
-            <button id="btn-copy-text" class="btn btn-outline" style="font-size:14px; padding: 6px 14px;">
-              📋 テキスト形式でコピー
-            </button>
+          <div class="post-type-group" id="post-type-group">
+            <label class="post-type-label">
+              <input type="radio" name="post-type" value="question" checked>
+              <span class="post-type-badge type-question">質問</span>
+              <span class="post-type-desc">発表者に質問する</span>
+            </label>
+            <label class="post-type-label">
+              <input type="radio" name="post-type" value="note">
+              <span class="post-type-badge type-note">メモ追記</span>
+              <span class="post-type-desc">気づいたことを追加</span>
+            </label>
+            <label class="post-type-label" id="expert-reply-option" style="display:none;">
+              <input type="radio" name="post-type" value="expert_reply">
+              <span class="post-type-badge type-expert">エキスパート回答</span>
+              <span class="post-type-desc">質問に答える</span>
+            </label>
           </div>
+
+          <div class="form-group" style="margin-top: 12px;">
+            <textarea id="post-input" class="form-textarea" rows="5"
+              placeholder="投稿内容を入力..."></textarea>
+          </div>
+          <button id="btn-post" class="btn btn-primary btn-full btn-student">投稿する</button>
         </div>
 
-        <div style="text-align: right; padding-bottom: 40px;">
+        <div style="text-align: right; padding: 20px 0 40px;">
           <button id="btn-to-opinion" class="btn btn-success btn-lg btn-student">
             意見をまとめる →
           </button>
-          <p class="form-hint mt-sm">各チームの要約を参考に自分の意見を書こう</p>
+          <p class="form-hint mt-sm">共有活動が終わったら次へ進もう</p>
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@
   <title>Opinionシート | ジグソー授業</title>
   <link rel="stylesheet" href="../css/common.css">
   <link rel="stylesheet" href="../css/student.css">
+  <link rel="stylesheet" href="../css/sharing.css">
   <link rel="stylesheet" href="../css/opinion.css">
 </head>
 <body>
@@ -26,12 +27,19 @@
     <div id="success-message" class="alert alert-success hidden"></div>
 
     <div class="opinion-layout">
-      <!-- 左カラム：共有活動のメモ（読み取り専用） -->
+      <!-- 左カラム：共有活動の投稿（折りたたみ） -->
       <div class="opinion-col-memo">
-        <div class="section-block">
-          <div class="section-title">📝 共有活動のメモ</div>
-          <div id="sharing-memo-display" class="sharing-memo-readonly sharing-memo-empty">
-            共有活動でメモがありませんでした
+        <div class="sharing-panel-section">
+          <button id="sharing-panel-toggle" class="sharing-panel-toggle">
+            📋 共有活動の投稿を見る <span id="sharing-toggle-icon">▼</span>
+          </button>
+          <div id="sharing-panel-body" class="sharing-panel-body hidden">
+            <div class="sharing-suit-filter" id="sharing-suit-filter">
+              <!-- JSで描画 -->
+            </div>
+            <div id="sharing-posts-list">
+              <p style="font-size:13px; color:var(--color-text-muted);">読み込み中...</p>
+            </div>
           </div>
         </div>
       </div>

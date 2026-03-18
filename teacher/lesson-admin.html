@@ -185,9 +185,35 @@
                 </div>
               </div>
 
+              <!-- 共有活動設定 -->
+              <div class="form-section">
+                <div class="form-section-header">⑥ 共有活動設定</div>
+                <div class="form-section-body">
+                  <div class="form-group">
+                    <label class="form-label">表示形式</label>
+                    <div style="display: flex; gap: 20px; margin-top: 8px; flex-wrap: wrap;">
+                      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="radio" name="sharing-mode" value="full" checked> 全文表示
+                      </label>
+                      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="radio" name="sharing-mode" value="keyword"> キーワードのみ（準備中）
+                      </label>
+                    </div>
+                    <p class="form-hint">「キーワードのみ」は今後対応予定です。現在は全文表示のみ有効です。</p>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">スートごとのキーワード（カンマ区切り）</label>
+                    <div id="keyword-inputs-area">
+                      <p class="text-muted" style="font-size:13px;">授業を保存するとスートに合わせて表示されます</p>
+                    </div>
+                    <p class="form-hint">キーワードモード時に生徒に提示する語句（例: 労働者,機械,工場）</p>
+                  </div>
+                </div>
+              </div>
+
               <!-- 詳細設定 -->
               <div class="form-section">
-                <div class="form-section-header">⑥ 詳細設定</div>
+                <div class="form-section-header">⑦ 詳細設定</div>
                 <div class="form-section-body">
                   <div class="form-row">
                     <div class="form-group">
@@ -222,7 +248,7 @@
               <!-- 実施クラス -->
               <div class="form-section" id="sessions-section">
                 <div class="form-section-header">
-                  ⑦ 実施クラス
+                  ⑧ 実施クラス
                   <button id="btn-add-session" class="btn btn-secondary btn-sm" style="margin-left: auto;">
                     + 追加
                   </button>

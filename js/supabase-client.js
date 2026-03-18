@@ -376,9 +376,13 @@ window.DB = {
     if (mErr) throw mErr;
 
     const materials = {};
-    (mats || []).forEach(m => { materials[m.suit] = m.content; });
+    const keywords = {};
+    (mats || []).forEach(m => {
+      materials[m.suit] = m.content;
+      keywords[m.suit] = m.keywords || [];
+    });
 
-    return { lesson, materials };
+    return { lesson, materials, keywords };
   },
 
   async createLesson(data) {
@@ -412,10 +416,10 @@ window.DB = {
   },
 
   // 資料をupsert
-  async saveMaterial(lessonId, suit, content) {
+  async saveMaterial(lessonId, suit, content, keywords) {
     const { error } = await this._sb
       .from('lesson_materials')
-      .upsert({ lesson_id: lessonId, suit, content }, { onConflict: 'lesson_id,suit' });
+      .upsert({ lesson_id: lessonId, suit, content, keywords: keywords || [] }, { onConflict: 'lesson_id,suit' });
     if (error) throw error;
   },
 
@@ -547,6 +551,52 @@ window.DB = {
       .order('card_number');
     if (error) throw error;
     return data || [];
+  },
+
+  // =========================================
+  // 生徒向け: 共有活動掲示板
+  // =========================================
+
+  // sharing_postsを取得（targetSuit=nullで全スート）
+  async getSharingPosts(lessonSessionId, cardNumber, isPublic, targetSuit) {
+    let query = this._sb
+      .from('sharing_posts')
+      .select('*')
+      .eq('lesson_session_id', lessonSessionId)
+      .order('created_at', { ascending: true });
+
+    if (targetSuit) {
+      query = query.eq('target_suit', targetSuit);
+    }
+    if (!isPublic) {
+      query = query.eq('card_number', cardNumber);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+  },
+
+  async createSharingPost({ lesson_session_id, card_number, suit, post_type, content, target_suit }) {
+    const { data, error } = await this._sb
+      .from('sharing_posts')
+      .insert({ lesson_session_id, card_number, suit, post_type, content, target_suit })
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  // =========================================
+  // 教師向け: 共有活動公開制御
+  // =========================================
+
+  async setSharingPublic(lessonSessionId, enabled) {
+    const { error } = await this._sb
+      .from('lesson_sessions')
+      .update({ sharing_public: enabled })
+      .eq('id', lessonSessionId);
+    if (error) throw error;
   },
 
   // 全lesson_sessionsをlesson名・class名付きで取得（ダッシュボード一覧用）

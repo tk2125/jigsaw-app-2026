@@ -94,6 +94,7 @@
       radio.addEventListener('change', () => {
         currentSuitCount = parseInt(radio.value);
         renderMaterialTabs(currentSuitCount);
+        renderKeywordInputs(currentSuitCount, {});
       });
     });
 
@@ -250,6 +251,11 @@
     renderTags(document.getElementById('terms-area'), requiredTerms, document.getElementById('term-tag-input'));
 
     renderMaterialTabs(3);
+    renderKeywordInputs(3, {});
+
+    // sharing-mode をリセット
+    const sharingModeDefault = document.querySelector('input[name="sharing-mode"][value="full"]');
+    if (sharingModeDefault) sharingModeDefault.checked = true;
   }
 
   // =============================================
@@ -260,7 +266,7 @@
     Utils.setLoading(true);
 
     try {
-      const { lesson, materials } = await DB.getLesson(lessonId);
+      const { lesson, materials, keywords } = await DB.getLesson(lessonId);
 
       document.getElementById('form-empty-state').classList.add('hidden');
       document.getElementById('lesson-form').classList.remove('hidden');
@@ -310,6 +316,12 @@
         if (ta && materials[suit]) ta.value = materials[suit];
       });
 
+      // 共有活動設定
+      const sharingMode = lesson.sharing_mode || 'full';
+      const sharingModeRadio = document.querySelector(`input[name="sharing-mode"][value="${sharingMode}"]`);
+      if (sharingModeRadio) sharingModeRadio.checked = true;
+      renderKeywordInputs(lesson.suit_count, keywords || {});
+
       // 実施クラス一覧
       await loadSessionsForLesson(lessonId);
 
@@ -338,6 +350,7 @@
     const suitCount = parseInt(document.querySelector('input[name="suit-count"]:checked').value);
     const positionType = document.querySelector('input[name="position-type"]:checked').value;
     const remainderType = document.querySelector('input[name="remainder-type"]:checked').value;
+    const sharingMode = document.querySelector('input[name="sharing-mode"]:checked')?.value || 'full';
 
     // パスワードを正規化して保存
     const normalizedPasswords = passwords.map(p => Utils.normalizeString(p)).filter(Boolean);
@@ -356,6 +369,7 @@
       rubric_source_criteria: document.getElementById('field-rubric-source').value.trim(),
       expert_timer_minutes: parseInt(document.getElementById('field-timer').value) || 15,
       entry_message: document.getElementById('field-entry-message').value.trim(),
+      sharing_mode: sharingMode,
       remainder_type: remainderType,
       priority_suit: remainderType === 'priority_suit' ? document.getElementById('field-priority-suit').value : null,
     };
@@ -374,7 +388,9 @@
       const suits = suitCount === 4 ? ['♤', '♧', '♡', '♢'] : ['♤', '♧', '♡'];
       for (const suit of suits) {
         const content = document.getElementById(`material-${suit}`)?.value || '';
-        await DB.saveMaterial(currentLessonId, suit, content);
+        const kwInput = document.getElementById(`keywords-${suit}`);
+        const kws = kwInput ? kwInput.value.split(',').map(k => k.trim()).filter(Boolean) : [];
+        await DB.saveMaterial(currentLessonId, suit, content, kws);
       }
 
       Utils.showSuccess('授業を保存しました');
@@ -482,6 +498,23 @@
     } catch (err) {
       Utils.showError('クラスの読み込みに失敗しました');
     }
+  }
+
+  // =============================================
+  // キーワード入力欄描画
+  // =============================================
+  function renderKeywordInputs(suitCount, keywordsData) {
+    const suits = suitCount === 4 ? ['♤', '♧', '♡', '♢'] : ['♤', '♧', '♡'];
+    const area = document.getElementById('keyword-inputs-area');
+    if (!area) return;
+    area.innerHTML = suits.map(s => `
+      <div class="form-group" style="margin-bottom: 8px;">
+        <label class="form-label" style="color:${Utils.suitToColor(s)};">${s} ${Utils.suitToName(s)}</label>
+        <input type="text" id="keywords-${s}" class="form-input"
+          placeholder="例: 労働者,機械,工場"
+          value="${Utils._escapeHtml((keywordsData?.[s] || []).join(', '))}">
+      </div>
+    `).join('');
   }
 
   async function addSession() {
