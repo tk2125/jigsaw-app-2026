@@ -54,7 +54,7 @@ window.TeacherAuth = {
     Utils.setLoading(true);
     try {
       const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/teacher/index.html',
+        redirectTo: window.location.href,
       });
       if (error) throw error;
       Utils.showSuccess('パスワードリセットのメールを送信しました。メールをご確認ください。');
