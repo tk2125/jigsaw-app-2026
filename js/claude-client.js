@@ -8,7 +8,10 @@ window.ClaudeAPI = {
     const url = `${window.APP_CONFIG.EDGE_FUNCTION_BASE_URL}/claude-proxy`;
     const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + window.APP_CONFIG.SUPABASE_ANON_KEY,
+      },
       body: JSON.stringify({ type, payload }),
     });
     if (!res.ok) {
