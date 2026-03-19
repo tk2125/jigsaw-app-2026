@@ -19,23 +19,37 @@ SUPABASE_ACCESS_TOKEN=sbp_... supabase functions deploy claude-proxy --project-r
 ※ アクセストークンは毎回ユーザーに確認する（使い捨て運用）
 
 ## アプリの画面フロー
-1. index.html → 授業パスワード入力
+1. index.html → 授業パスワード入力（entry_messageバナー表示あり）
 2. student/entry.html → スート（♤♧♡♢）と数字（グループ番号）選択
 3. student/expert.html → エキスパート活動（資料読解・要約・AIフィードバック）
-4. student/sharing.html → 共有活動（同グループの要約を表示・メモ）
-5. student/opinion.html → 意見シート記入（左カラムに共有メモ表示）
+4. student/sharing.html → 共有活動（掲示板形式：スートタブ・投稿・Realtime）
+5. student/opinion.html → 意見シート記入（左カラムに共有活動パネル）
 6. student/exchange.html → 意見交換
 
 ## Supabaseテーブル構成
 - academic_years: 年度
 - classes: クラス
-- lessons: 授業
-- lesson_materials: 資料（スートごと）
-- lesson_sessions: 授業セッション（パスワード含む）
+- lessons: 授業（teacher_id, entry_message, sharing_mode カラムあり）
+- lesson_materials: 資料（スートごと、keywords TEXT[]カラムあり）
+- lesson_sessions: 授業セッション（sharing_public BOOLEANカラムあり）
 - student_sessions: 生徒の活動記録（suit, card_number, summary_text, summary_submitted_at等）
 - ai_interactions: AI対話履歴
 - exchange_posts: 意見交換投稿
 - exchange_likes: いいね
+- sharing_posts: 共有活動投稿（card_number, suit, post_type, content, target_suit）
+  - post_typeは 'question' / 'note' / 'expert_reply' の3種
+
+## RLSポリシー構成（重要）
+- lessons: anonはSELECT全件可（anon_read_lessons）。authenticatedは自分のteacher_idのみCRUD可
+- lesson_materials: anonはSELECT全件可。authenticatedは自分のlessonsに紐づくもののみCRUD可
+- lesson_sessions: anonはSELECT全件可。authenticatedは自分のlessonsに紐づくもののみCRUD可
+- sharing_posts: anonもauthenticatedも全件CRUD可
+- **注意**: RLSマイグレーション後にanon_read系ポリシーが消えると生徒のパスワード入力が壊れる
+
+## 既知の注意点
+- GitHub PagesのサブパスはURLに含まれる（https://tk2125.github.io/jigsaw-app-2026/）
+  - redirectToにwindow.location.originを使うとサブパスが欠落する → window.location.hrefを使う
+- teacher/index.htmlには#error-message と #success-message の両方が必要
 
 ## テストデータ
 - 授業パスワード: jigsaw2026
@@ -44,12 +58,17 @@ SUPABASE_ACCESS_TOKEN=sbp_... supabase functions deploy claude-proxy --project-r
 
 ## 主要ファイル
 - js/config.js: Supabase接続情報（SUPABASE_URL, SUPABASE_ANON_KEY, EDGE_FUNCTION_BASE_URL）
-- js/supabase-client.js: DB操作関数まとめ
+- js/supabase-client.js: DB操作関数まとめ（getSharingPosts/createSharingPost/setSharingPublic含む）
 - js/claude-client.js: Edge Function呼び出し（_callメソッドにAuthorizationヘッダー必須）
 - js/student/entry.js: ログイン・進捗判定・ページ振り分け
 - js/student/expert.js: エキスパート活動ロジック（コピペチェック含む）
-- js/student/sharing.js: 共有活動ロジック（30秒自動更新・コピー機能）
-- js/student/opinion.js: 意見シート（左カラムに共有メモ表示）
+- js/student/sharing.js: 共有活動（掲示板形式・Realtime購読・30秒ポーリング）
+- js/student/opinion.js: 意見シート（setupSharingPanel()で共有活動パネルを遅延描画）
+- js/teacher/dashboard.js: ダッシュボード（sharing_public/exchange_phaseトグル・生徒詳細モーダル）
+- js/teacher/lesson-admin.js: 授業管理（keywords/sharing_mode対応済み）
+- js/teacher/auth.js: 教師認証（handlePasswordReset: redirectTo=window.location.href）
+- css/sharing.css: 共有活動+opinionパネル共通スタイル（student/sharing.html・opinion.htmlで使用）
+- supabase/schema.sql: 全テーブル定義＋マイグレーション（末尾に2ブロック追記済み）
 - supabase/functions/claude-proxy/index.ts: Edge Function本体
 
 ## Edge Functionのリクエストタイプ
@@ -63,17 +82,35 @@ SUPABASE_ACCESS_TOKEN=sbp_... supabase functions deploy claude-proxy --project-r
 - [x] Supabaseテーブル・認証設定
 - [x] Edge Function（claude-proxy）デプロイ
 - [x] テストデータ投入
-- [x] 共有活動ページ（sharing.html）追加
-  - 同グループ番号の全スート要約を左カラムに表示
-  - 30秒自動更新
-  - Markdown/テキスト形式でコピー可能
-- [x] opinion.htmlに共有メモ表示（左カラム参照）
 - [x] コピペ対策（AIによるcopy_checkチェック）
-  - 資料と酷似した要約は送信ブロック＋警告表示
 - [x] Edge FunctionへのAuthorizationヘッダー修正（401エラー解消）
+- [x] 教師画面の整備（2026-03-19）
+  - RLS: teacher_idによる授業の教師別アクセス制限
+  - entry_message: パスワード照合後のカスタムバナー表示
+  - 生徒提出物の詳細閲覧モーダル（ダッシュボード行クリック）
+  - パスワードリセットリンク（teacher/index.html）
+- [x] sharing.html 全面改修（掲示板形式）（2026-03-19）
+  - スートタブで各チームの要約＋投稿を切り替え表示
+  - 投稿タイプ：質問 / メモ追記 / エキスパート回答（自分のスートタブのみ）
+  - Supabase Realtimeリアルタイム購読 ＋ 30秒ポーリング（フォールバック）
+  - sharing_publicモード：教師がONにすると全グループの投稿が見える
+  - 要約テキストはコピー禁止（user-select: none）
+- [x] opinion.html 改修（2026-03-19）
+  - 左カラムをsessionStorage共有メモ→共有活動パネル（折りたたみ）に変更
+  - スートフィルター付き、パネル開放時に遅延読み込み
+- [x] teacher/lesson-admin.html 改修（2026-03-19）
+  - ⑥共有活動設定セクション追加（表示形式・スートごとキーワード）
+- [x] teacher/dashboard.html 改修（2026-03-19）
+  - sharing_publicトグル追加
+
+## Supabaseマイグレーション状況
+supabase/schema.sql 末尾に2ブロック追記済み。**本番DBへの適用はユーザーが手動実行**。
+- マイグレーション1: sharing_postsテーブル作成 + sharing_public/sharing_mode/keywordsカラム追加
+- マイグレーション2: teacher_id/entry_messageカラム追加 + RLSポリシー再構成
+- ※ マイグレーション後にanon_read_lessonsポリシーが消えた場合は手動で再作成が必要
 
 ## 未着手・今後の作業候補
-- [ ] 動作確認：各画面の全フロー通し確認
-- [ ] 教師画面の動作確認
+- [ ] 本番用マイグレーションの動作確認（sharing_posts/sharing_publicが実際に機能するか）
+- [ ] 全フロー通し確認（index→entry→expert→sharing→opinion→exchange）
 - [ ] 本番用データ（実際の授業）の作成
 - [ ] student_sessionsのテストデータリセット機能（教師画面から）
