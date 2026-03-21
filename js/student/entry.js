@@ -184,6 +184,26 @@
   }
 
   // =============================================
+  // 重複入室警告ダイアログ（Promise ベース）
+  // =============================================
+  function showDuplicateWarning(suit, cardNumber) {
+    return new Promise((resolve) => {
+      document.getElementById('duplicate-warning-card').textContent =
+        `${suit} ${Utils.cardNumberToLabel(cardNumber)}`;
+      document.getElementById('duplicate-warning-modal').classList.remove('hidden');
+
+      document.getElementById('btn-duplicate-continue').onclick = () => {
+        document.getElementById('duplicate-warning-modal').classList.add('hidden');
+        resolve(true);
+      };
+      document.getElementById('btn-duplicate-back').onclick = () => {
+        document.getElementById('duplicate-warning-modal').classList.add('hidden');
+        resolve(false);
+      };
+    });
+  }
+
+  // =============================================
   // トランプ送信処理
   // =============================================
   async function handleTrumpSubmit() {
@@ -225,6 +245,18 @@
       let session = await DB.findExistingStudentSession(lessonSessionId, actualSuit, parseInt(cardNumber));
 
       if (session) {
+        // 重複チェック: すでに作業が進んでいる場合は警告
+        if (session.summary_submitted_at || session.opinion_submitted_at) {
+          Utils.setLoading(false);
+          const proceed = await showDuplicateWarning(actualSuit, cardNumber);
+          if (!proceed) return;
+          // 「続ける」を選んだ場合はDBに記録（失敗しても入室は続行）
+          Utils.setLoading(true);
+          try {
+            await DB.recordDuplicateEntry(lessonSessionId, actualSuit, parseInt(cardNumber));
+          } catch (e) { /* 記録失敗は無視 */ }
+        }
+
         // 既存セッションがある場合
         if (session.opinion_submitted_at) {
           // Opinion提出済み → 閲覧確認

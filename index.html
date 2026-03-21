@@ -90,6 +90,20 @@
     </div>
   </div>
 
+  <!-- 重複入室警告モーダル -->
+  <div id="duplicate-warning-modal" class="hidden" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.55);z-index:1000;display:flex;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:14px;padding:28px 24px;max-width:340px;width:92%;box-shadow:0 8px 32px rgba(0,0,0,0.22);">
+      <div style="font-size:36px;text-align:center;margin-bottom:10px;">⚠️</div>
+      <p style="font-size:15px;font-weight:700;text-align:center;margin-bottom:6px;">このカードには別の人が入室しています</p>
+      <p style="font-size:14px;text-align:center;margin-bottom:4px;">カード：<strong id="duplicate-warning-card"></strong></p>
+      <p style="font-size:13px;color:#64748b;text-align:center;margin-bottom:22px;">間違いの場合は先生に知らせてください。このまま続けますか？</p>
+      <div style="display:flex;gap:10px;">
+        <button id="btn-duplicate-back" class="btn btn-secondary" style="flex:1;">← 戻る</button>
+        <button id="btn-duplicate-continue" class="btn btn-primary" style="flex:1;background:#dc2626;border-color:#dc2626;">このまま続ける</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/config.js"></script>
   <script src="js/utils.js"></script>

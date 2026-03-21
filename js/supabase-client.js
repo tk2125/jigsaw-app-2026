@@ -599,6 +599,57 @@ window.DB = {
     if (error) throw error;
   },
 
+  // =========================================
+  // 重複入室ログ
+  // =========================================
+
+  async recordDuplicateEntry(lessonSessionId, suit, cardNumber) {
+    const { error } = await this._sb
+      .from('duplicate_entries')
+      .insert({ lesson_session_id: lessonSessionId, suit, card_number: cardNumber });
+    if (error) throw error;
+  },
+
+  async getDuplicateEntries(lessonSessionId) {
+    const { data, error } = await this._sb
+      .from('duplicate_entries')
+      .select('*')
+      .eq('lesson_session_id', lessonSessionId)
+      .order('occurred_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
+  // =========================================
+  // AI対話ログ（教師向け）
+  // =========================================
+
+  async getAiInteractionsBySession(lessonSessionId) {
+    const { data: sessions, error: sErr } = await this._sb
+      .from('student_sessions')
+      .select('id, suit, card_number')
+      .eq('lesson_session_id', lessonSessionId);
+    if (sErr) throw sErr;
+    if (!sessions || sessions.length === 0) return [];
+
+    const sessionIds = sessions.map(s => s.id);
+    const sessionMap = {};
+    sessions.forEach(s => { sessionMap[s.id] = s; });
+
+    const { data, error } = await this._sb
+      .from('ai_interactions')
+      .select('*')
+      .in('student_session_id', sessionIds)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+
+    return (data || []).map(row => ({
+      ...row,
+      suit: sessionMap[row.student_session_id]?.suit,
+      card_number: sessionMap[row.student_session_id]?.card_number,
+    }));
+  },
+
   // 全lesson_sessionsをlesson名・class名付きで取得（ダッシュボード一覧用）
   async getAllLessonSessions() {
     const { data, error } = await this._sb

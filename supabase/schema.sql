@@ -259,6 +259,29 @@ CREATE POLICY "auth_crud_own_lesson_materials" ON lesson_materials
     SELECT 1 FROM lessons WHERE lessons.id = lesson_materials.lesson_id AND lessons.teacher_id = auth.uid()
   ));
 
+-- ===========================================
+-- マイグレーション: 重複入室ログテーブル
+-- Supabase ダッシュボード → SQL Editor で実行してください
+-- ===========================================
+
+CREATE TABLE IF NOT EXISTS duplicate_entries (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  lesson_session_id UUID REFERENCES lesson_sessions(id) ON DELETE CASCADE,
+  suit TEXT NOT NULL,
+  card_number INTEGER NOT NULL,
+  occurred_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE duplicate_entries ENABLE ROW LEVEL SECURITY;
+
+-- anon（生徒）は記録のみ可
+CREATE POLICY "anon_insert_duplicate_entries" ON duplicate_entries
+  FOR INSERT TO anon WITH CHECK (true);
+
+-- authenticated（教師）は全操作可
+CREATE POLICY "auth_all_duplicate_entries" ON duplicate_entries
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
 -- lesson_sessions: 自分のlessonに紐づくもののみ
 DROP POLICY IF EXISTS "auth_all_lesson_sessions" ON lesson_sessions;
 CREATE POLICY "auth_crud_own_lesson_sessions" ON lesson_sessions

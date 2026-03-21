@@ -8,6 +8,7 @@
   let exchangePhaseOn = false;
   let sharingPublicOn = false;
   let studentsData = [];
+  let duplicateEntriesData = [];
 
   const REFRESH_INTERVAL_MS = 20000; // 20秒
 
@@ -76,6 +77,20 @@
     });
     document.getElementById('student-detail-modal').addEventListener('click', (e) => {
       if (e.target === e.currentTarget) e.currentTarget.classList.add('hidden');
+    });
+
+    // 重複入室バッジ
+    document.getElementById('btn-duplicate-badge').addEventListener('click', showDuplicateModal);
+    document.getElementById('duplicate-modal-close').addEventListener('click', () => {
+      document.getElementById('duplicate-entries-modal').classList.add('hidden');
+    });
+    document.getElementById('duplicate-entries-modal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) e.currentTarget.classList.add('hidden');
+    });
+
+    // AI対話ログ再読込
+    document.getElementById('btn-reload-ai-log').addEventListener('click', () => {
+      if (selectedSessionId) loadAiInteractions();
     });
   }
 
@@ -177,6 +192,9 @@
     if (autoRefreshInterval) clearInterval(autoRefreshInterval);
     await loadDashboardData();
     autoRefreshInterval = setInterval(loadDashboardData, REFRESH_INTERVAL_MS);
+
+    // AI対話ログは初回のみ読み込む（重い処理のため自動更新対象外）
+    loadAiInteractions();
   }
 
   // =============================================
@@ -186,10 +204,11 @@
     if (!selectedSessionId) return;
 
     try {
-      // セッションステータスとダッシュボードデータを並行取得
-      const [status, dashData] = await Promise.all([
+      // セッションステータス・ダッシュボードデータ・重複入室を並行取得
+      const [status, dashData, duplicateEntries] = await Promise.all([
         DB.getLessonSessionStatus(selectedSessionId),
         DB.getDashboardData(selectedSessionId),
+        DB.getDuplicateEntries(selectedSessionId),
       ]);
 
       // 意見交換フェーズ状態を反映
@@ -213,6 +232,10 @@
 
       // 立場分布グラフ
       renderPositionChart(dashData.positionStats);
+
+      // 重複入室バッジ
+      duplicateEntriesData = duplicateEntries;
+      updateDuplicateBadge(duplicateEntries.length);
 
       // 最終更新時刻
       document.getElementById('last-updated').textContent = `最終更新: ${Utils.nowTimeStr()}`;
@@ -333,6 +356,120 @@
     const label = document.getElementById('sharing-public-status-label');
     label.textContent = enabled ? 'ON（全グループ公開）' : 'OFF（グループ内のみ）';
     label.style.color = enabled ? 'var(--color-success)' : 'var(--color-text-muted)';
+  }
+
+  // =============================================
+  // 重複入室バッジ・モーダル
+  // =============================================
+  function updateDuplicateBadge(count) {
+    const badge = document.getElementById('btn-duplicate-badge');
+    document.getElementById('duplicate-count').textContent = count;
+    badge.classList.toggle('hidden', count === 0);
+  }
+
+  function showDuplicateModal() {
+    const list = document.getElementById('duplicate-entries-list');
+    if (duplicateEntriesData.length === 0) {
+      list.innerHTML = '<p class="text-muted" style="padding: 16px;">重複入室の記録はありません</p>';
+    } else {
+      list.innerHTML = `
+        <table class="data-table">
+          <thead>
+            <tr><th>スート</th><th>番号</th><th>発生時刻</th></tr>
+          </thead>
+          <tbody>
+            ${duplicateEntriesData.map(e => `
+              <tr>
+                <td style="color:${Utils.suitToColor(e.suit)};">${e.suit}</td>
+                <td>${Utils.cardNumberToLabel(e.card_number)}</td>
+                <td style="font-size:13px;">${Utils.formatTime(e.occurred_at)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+    document.getElementById('duplicate-entries-modal').classList.remove('hidden');
+  }
+
+  // =============================================
+  // AI対話ログ
+  // =============================================
+  const INAPPROPRIATE_WORDS = [
+    '死ね', '殺す', 'バカ', 'ばか', 'うざい', 'ウザい',
+    'クソ', 'くそ', 'むかつく', 'アホ', 'あほ', 'カス', 'かす',
+    'ざけんな', '消えろ',
+  ];
+
+  const AI_TYPE_LABEL = {
+    summary_feedback: '要約フィードバック',
+    explanation: '説明練習',
+    opinion_feedback: '意見フィードバック',
+  };
+
+  async function loadAiInteractions() {
+    if (!selectedSessionId) return;
+    const container = document.getElementById('ai-log-body');
+    container.innerHTML = '<p class="text-muted" style="padding:8px;font-size:13px;">読み込み中...</p>';
+    try {
+      const interactions = await DB.getAiInteractionsBySession(selectedSessionId);
+      renderAiLog(interactions);
+    } catch (err) {
+      container.innerHTML = '<p class="text-muted" style="padding:8px;">読み込みに失敗しました</p>';
+    }
+  }
+
+  function renderAiLog(interactions) {
+    const container = document.getElementById('ai-log-body');
+    if (!interactions || interactions.length === 0) {
+      container.innerHTML = '<p class="text-muted" style="padding:8px;font-size:13px;">AI対話の記録はありません</p>';
+      return;
+    }
+
+    const rows = interactions.map(item => {
+      const msgs = item.messages || [];
+      const userText = msgs
+        .filter(m => m.role === 'user')
+        .map(m => m.content)
+        .join(' / ');
+      const aiText = msgs
+        .filter(m => m.role === 'assistant')
+        .map(m => m.content)
+        .join(' / ');
+      const isInappropriate = INAPPROPRIATE_WORDS.some(w => userText.includes(w));
+      const rowStyle = isInappropriate ? 'background:#fef2f2;' : '';
+      const suitColor = Utils.suitToColor(item.suit || '♤');
+      const userDisplay = Utils._escapeHtml(
+        userText.length > 120 ? userText.slice(0, 120) + '...' : userText
+      );
+      const aiDisplay = Utils._escapeHtml(
+        aiText.length > 120 ? aiText.slice(0, 120) + '...' : aiText
+      );
+      return `
+        <tr style="${rowStyle}">
+          <td style="color:${suitColor};white-space:nowrap;">${item.suit || '?'}</td>
+          <td style="white-space:nowrap;">${item.card_number != null ? Utils.cardNumberToLabel(item.card_number) : '?'}</td>
+          <td style="font-size:12px;white-space:nowrap;">${AI_TYPE_LABEL[item.interaction_type] || item.interaction_type}</td>
+          <td style="font-size:12px;max-width:200px;word-break:break-all;">${isInappropriate ? '🚨 ' : ''}${userDisplay}</td>
+          <td style="font-size:12px;max-width:200px;word-break:break-all;">${aiDisplay}</td>
+          <td style="font-size:12px;white-space:nowrap;">${Utils.formatTime(item.created_at)}</td>
+        </tr>
+      `;
+    }).join('');
+
+    container.innerHTML = `
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>スート</th><th>番号</th><th>種類</th>
+              <th>生徒の入力</th><th>AIの返答</th><th>時刻</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
   }
 
   // ページ離脱時にクリーンアップ

@@ -3,6 +3,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
 const CLAUDE_MODEL = "claude-haiku-4-5-20251001";
 
+const GUARD_PROMPT = `あなたは高校の授業支援AIです。歴史の授業のジグソー学習をサポートします。授業に無関係な話題、不適切・差別的な内容には一切応じず、「授業に関係する質問をしてください」と返してください。\n\n`;
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -21,7 +23,7 @@ serve(async (req) => {
 
     if (type === "summary_feedback") {
       // 要約へのフィードバック
-      systemPrompt = `あなたは高校歴史の教師です。生徒の資料要約を読んで、簡潔で建設的なフィードバックを200字以内で返してください。
+      systemPrompt = GUARD_PROMPT + `あなたは高校歴史の教師です。生徒の資料要約を読んで、簡潔で建設的なフィードバックを200字以内で返してください。
 良い点を1つ、改善できる点を1つ挙げる形式にしてください。専門用語は使わず、生徒が理解できる言葉で書いてください。`;
       messages = [
         {
@@ -31,7 +33,7 @@ serve(async (req) => {
       ];
     } else if (type === "explanation_start") {
       // 説明練習開始（AIが生徒役として最初の質問を返す）
-      systemPrompt = `あなたは高校生です。クラスメートから歴史の資料内容を教えてもらっています。
+      systemPrompt = GUARD_PROMPT + `あなたは高校生です。クラスメートから歴史の資料内容を教えてもらっています。
 内容を理解しようと、素直な疑問や確認の質問を1〜2つ投げかけてください。
 専門用語は知らないふりをして、わかりやすく聞いてください。
 50字以内で質問してください。`;
@@ -43,14 +45,14 @@ serve(async (req) => {
       ];
     } else if (type === "explanation_continue") {
       // 説明練習の続き
-      systemPrompt = `あなたは高校生です。クラスメートから歴史の資料内容を教えてもらっています。
+      systemPrompt = GUARD_PROMPT + `あなたは高校生です。クラスメートから歴史の資料内容を教えてもらっています。
 相手の説明を聞いて、理解を深めるための質問や「なるほど」という反応を返してください。
 会話が3往復以上続いたら「よく分かった！ありがとう」と締めくくってください。
 50字以内で返してください。`;
       messages = payload.messages;
     } else if (type === "opinion_feedback") {
       // Opinionへのフィードバック
-      systemPrompt = `あなたは高校歴史の教師です。生徒のOpinion（意見文）を読んで、以下のルーブリック基準を参考に改善のためのフィードバックを250字以内で返してください。
+      systemPrompt = GUARD_PROMPT + `あなたは高校歴史の教師です。生徒のOpinion（意見文）を読んで、以下のルーブリック基準を参考に改善のためのフィードバックを250字以内で返してください。
 
 【ルーブリック基準】
 論理（ロジック）: ${payload.rubricLogicCriteria}
