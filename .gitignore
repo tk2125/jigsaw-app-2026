@@ -1,0 +1,15 @@
+# Claude Code instructions (contains project internals)
+CLAUDE.md
+
+# Environment / secrets
+.env
+.env.local
+.env*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
