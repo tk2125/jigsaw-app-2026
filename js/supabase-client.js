@@ -620,6 +620,14 @@ window.DB = {
     return data || [];
   },
 
+  async clearDuplicateEntries(lessonSessionId) {
+    const { error } = await this._sb
+      .from('duplicate_entries')
+      .delete()
+      .eq('lesson_session_id', lessonSessionId);
+    if (error) throw error;
+  },
+
   // =========================================
   // AI対話ログ（教師向け）
   // =========================================

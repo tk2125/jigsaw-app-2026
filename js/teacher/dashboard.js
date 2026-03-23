@@ -84,6 +84,19 @@
     document.getElementById('duplicate-modal-close').addEventListener('click', () => {
       document.getElementById('duplicate-entries-modal').classList.add('hidden');
     });
+    document.getElementById('btn-clear-duplicates').addEventListener('click', async () => {
+      if (!selectedSessionId) return;
+      if (!confirm('重複入室の記録をすべて削除しますか？')) return;
+      try {
+        await DB.clearDuplicateEntries(selectedSessionId);
+        duplicateEntriesData = [];
+        updateDuplicateBadge(0);
+        document.getElementById('duplicate-entries-modal').classList.add('hidden');
+        Utils.showSuccess('重複入室の記録をクリアしました');
+      } catch (err) {
+        Utils.showError('クリアに失敗しました: ' + err.message);
+      }
+    });
     document.getElementById('duplicate-entries-modal').addEventListener('click', (e) => {
       if (e.target === e.currentTarget) e.currentTarget.classList.add('hidden');
     });

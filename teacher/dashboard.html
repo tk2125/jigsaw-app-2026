@@ -202,7 +202,10 @@
     <div class="modal-box">
       <div class="modal-header">
         <h3>⚠️ 重複入室の記録</h3>
-        <button id="duplicate-modal-close" class="btn btn-secondary btn-sm">✕ 閉じる</button>
+        <div style="display:flex;gap:8px;">
+          <button id="btn-clear-duplicates" class="btn btn-danger btn-sm">🗑 記録をクリア</button>
+          <button id="duplicate-modal-close" class="btn btn-secondary btn-sm">✕ 閉じる</button>
+        </div>
       </div>
       <div class="modal-body" id="duplicate-entries-list">
       </div>
