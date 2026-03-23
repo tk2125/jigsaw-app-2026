@@ -138,7 +138,7 @@
       if (yearEl) {
         document.getElementById('class-panel-title').textContent = yearEl.textContent + ' のクラス';
       }
-      document.getElementById('class-add-form').style.display = 'flex';
+      document.getElementById('class-add-form').classList.remove('hidden');
       renderClasses(classes);
     } catch (err) {
       Utils.showError('クラスの読み込みに失敗しました: ' + err.message);
