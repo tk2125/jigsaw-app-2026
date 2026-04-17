@@ -291,7 +291,7 @@
           <td>${Utils.cardNumberToLabel(s.card_number)}</td>
           <td class="check-cell">${summaryOk ? '<span style="color:var(--color-success);">✓</span>' : '<span style="color:var(--color-border);">—</span>'}</td>
           <td class="check-cell">${opinionOk ? '<span style="color:var(--color-success);">✓</span>' : '<span style="color:var(--color-border);">—</span>'}</td>
-          <td>${s.position_choice || '<span class="text-muted">—</span>'}</td>
+          <td>${s.position_choice ? Utils._escapeHtml(s.position_choice) : '<span class="text-muted">—</span>'}</td>
         </tr>
       `;
     }).join('');
@@ -329,8 +329,8 @@
 
     container.innerHTML = entries.map(([term, count]) => `
       <span class="term-tag">
-        ${term}
-        <span class="term-count">${count}</span>
+        ${Utils._escapeHtml(String(term))}
+        <span class="term-count">${parseInt(count) || 0}</span>
       </span>
     `).join('');
   }
@@ -353,7 +353,7 @@
         <div class="mini-bar-group">
           <div class="mini-bar-count">${count}</div>
           <div class="mini-bar" style="height: ${height}px;"></div>
-          <div class="mini-bar-label">${key}</div>
+          <div class="mini-bar-label">${Utils._escapeHtml(String(key))}</div>
         </div>
       `;
     }).join('');

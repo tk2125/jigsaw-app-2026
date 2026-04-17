@@ -5,8 +5,10 @@ const CLAUDE_MODEL = "claude-haiku-4-5-20251001";
 
 const GUARD_PROMPT = `あなたは高校の授業支援AIです。歴史の授業のジグソー学習をサポートします。授業に無関係な話題、不適切・差別的な内容には一切応じず、「授業に関係する質問をしてください」と返してください。\n\n`;
 
+const ALLOWED_ORIGIN = Deno.env.get("ALLOWED_ORIGIN") ?? "https://tk2125.github.io";
+
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
