@@ -41,7 +41,7 @@ window.DB = {
       .eq('is_active', true)
       .limit(1);
     if (sErr) throw sErr;
-    if (!sessions || sessions.length === 0) return null;
+    if (!sessions || sessions.length === 0) return { inactive: true };
 
     const lessonSession = sessions[0];
 
@@ -489,6 +489,47 @@ window.DB = {
       .update({ is_active: false })
       .eq('id', lessonSessionId);
     if (error) throw error;
+  },
+
+  async deactivateAllSessions() {
+    const { error } = await this._sb
+      .from('lesson_sessions')
+      .update({ is_active: false })
+      .eq('is_active', true);
+    if (error) throw error;
+  },
+
+  async resetStudentSessionData(lessonSessionId) {
+    const { error } = await this._sb
+      .from('student_sessions')
+      .update({
+        summary_text: null,
+        summary_submitted_at: null,
+        position_choice: null,
+        required_terms_used: [],
+        opinion_text: null,
+        rubric_logic_score: null,
+        rubric_source_score: null,
+        opinion_submitted_at: null,
+      })
+      .eq('lesson_session_id', lessonSessionId);
+    if (error) throw error;
+  },
+
+  async getLessonsWithoutSessions() {
+    const { data: lessons, error } = await this._sb
+      .from('lessons')
+      .select('id, name, created_at')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+
+    const { data: sessions, error: sErr } = await this._sb
+      .from('lesson_sessions')
+      .select('lesson_id');
+    if (sErr) throw sErr;
+
+    const lessonIdsWithSessions = new Set((sessions || []).map(s => s.lesson_id));
+    return (lessons || []).filter(l => !lessonIdsWithSessions.has(l.id));
   },
 
   async setExchangePhase(lessonSessionId, enabled) {

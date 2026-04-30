@@ -20,6 +20,7 @@
     if (!ok) return;
 
     setupEventListeners();
+    loadNoSessionWarning();
   });
 
   function setupEventListeners() {
@@ -105,6 +106,21 @@
     document.getElementById('btn-reload-ai-log').addEventListener('click', () => {
       if (selectedSessionId) loadAiInteractions();
     });
+
+    // 全授業終了
+    document.getElementById('btn-deactivate-all').addEventListener('click', async () => {
+      if (!confirm('実施中のすべての授業セッションを終了しますか？')) return;
+      Utils.setLoading(true);
+      try {
+        await DB.deactivateAllSessions();
+        Utils.showSuccess('全授業セッションを終了しました');
+        loadSessionList();
+      } catch (err) {
+        Utils.showError('操作に失敗しました: ' + err.message);
+      } finally {
+        Utils.setLoading(false);
+      }
+    });
   }
 
   // =============================================
@@ -130,54 +146,86 @@
       return;
     }
 
-    container.innerHTML = sessions.map(s => `
-      <div class="session-row ${s.is_active ? 'active-session' : ''}" data-session-id="${s.id}">
-        <div class="session-info">
-          <div class="session-name">
-            ${s.is_active ? '🟢 ' : ''}${s.lesson_name} — ${s.class_name}
+    container.innerHTML = sessions.map(s => {
+      const toggleId = `toggle-sess-${s.id.slice(0, 8)}`;
+      return `
+        <div class="session-row ${s.is_active ? 'active-session' : ''}" data-session-id="${s.id}">
+          <div class="session-info">
+            <div class="session-name">
+              ${s.is_active ? '🟢 ' : ''}${s.lesson_name} — ${s.class_name}
+            </div>
+            <div class="session-meta">${Utils.formatDate(s.session_date)} ${s.is_active ? '（アクティブ）' : ''}</div>
           </div>
-          <div class="session-meta">${Utils.formatDate(s.session_date)} ${s.is_active ? '（アクティブ）' : ''}</div>
+          <div class="session-actions" style="align-items:center;">
+            <div class="toggle-wrap" style="margin:0;" title="${s.is_active ? 'クリックで停止' : 'クリックでアクティブ化'}">
+              <input type="checkbox" class="toggle-input toggle-is-active" id="${toggleId}"
+                data-id="${s.id}" data-lesson="${Utils._escapeHtml(s.lesson_name)}" ${s.is_active ? 'checked' : ''}>
+              <label class="toggle-track" for="${toggleId}">
+                <span class="toggle-thumb"></span>
+              </label>
+            </div>
+            <button class="btn btn-secondary btn-sm btn-reset-session" data-id="${s.id}">🔄 リセット</button>
+            <button class="btn btn-primary btn-sm btn-select-session" data-id="${s.id}" data-lesson="${Utils._escapeHtml(s.lesson_name)}">
+              モニタリング →
+            </button>
+          </div>
         </div>
-        <div class="session-actions">
-          ${!s.is_active
-            ? `<button class="btn btn-success btn-sm btn-activate" data-id="${s.id}" data-lesson="${s.lesson_name}">アクティブにする</button>`
-            : `<button class="btn btn-secondary btn-sm btn-deactivate" data-id="${s.id}">停止</button>`
-          }
-          <button class="btn btn-primary btn-sm btn-select-session" data-id="${s.id}" data-lesson="${s.lesson_name}">
-            モニタリング →
-          </button>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
-    // アクティブ化ボタン
-    container.querySelectorAll('.btn-activate').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if (!confirm(`「${btn.dataset.lesson}」をアクティブにしますか？\n同一授業の他のセッションは停止されます。`)) return;
-        Utils.setLoading(true);
-        try {
-          await DB.setActiveSession(btn.dataset.id);
-          Utils.showSuccess('アクティブにしました');
-          loadSessionList();
-        } catch (err) {
-          Utils.showError('切り替えに失敗しました: ' + err.message);
-        } finally {
-          Utils.setLoading(false);
+    // is_active トグル
+    container.querySelectorAll('.toggle-is-active').forEach(toggle => {
+      toggle.addEventListener('change', async (e) => {
+        const enabled = e.target.checked;
+        const id = toggle.dataset.id;
+        const lesson = toggle.dataset.lesson;
+        if (enabled) {
+          if (!confirm(`「${lesson}」をアクティブにしますか？\n同一授業の他のセッションは停止されます。`)) {
+            e.target.checked = false;
+            return;
+          }
+          Utils.setLoading(true);
+          try {
+            await DB.setActiveSession(id);
+            Utils.showSuccess('アクティブにしました');
+            loadSessionList();
+          } catch (err) {
+            e.target.checked = false;
+            Utils.showError('切り替えに失敗しました: ' + err.message);
+          } finally {
+            Utils.setLoading(false);
+          }
+        } else {
+          if (!confirm('このセッションを停止しますか？')) {
+            e.target.checked = true;
+            return;
+          }
+          Utils.setLoading(true);
+          try {
+            await DB.deactivateSession(id);
+            Utils.showSuccess('停止しました');
+            loadSessionList();
+          } catch (err) {
+            e.target.checked = true;
+            Utils.showError('停止に失敗しました: ' + err.message);
+          } finally {
+            Utils.setLoading(false);
+          }
         }
       });
     });
 
-    // 停止ボタン
-    container.querySelectorAll('.btn-deactivate').forEach(btn => {
+    // リセットボタン
+    container.querySelectorAll('.btn-reset-session').forEach(btn => {
       btn.addEventListener('click', async () => {
-        if (!confirm('このセッションを停止しますか？')) return;
+        if (!confirm('このセッションの生徒データをすべてリセットしますか？\n（要約・意見がクリアされます。元に戻せません。）')) return;
         Utils.setLoading(true);
         try {
-          await DB.deactivateSession(btn.dataset.id);
-          Utils.showSuccess('停止しました');
-          loadSessionList();
+          await DB.resetStudentSessionData(btn.dataset.id);
+          Utils.showSuccess('生徒データをリセットしました');
+          if (selectedSessionId === btn.dataset.id) loadDashboardData();
         } catch (err) {
-          Utils.showError('停止に失敗しました: ' + err.message);
+          Utils.showError('リセットに失敗しました: ' + err.message);
         } finally {
           Utils.setLoading(false);
         }
@@ -483,6 +531,26 @@
         </table>
       </div>
     `;
+  }
+
+  // =============================================
+  // セッション未設定の授業警告
+  // =============================================
+  async function loadNoSessionWarning() {
+    try {
+      const lessons = await DB.getLessonsWithoutSessions();
+      const el = document.getElementById('no-session-warning');
+      if (!el) return;
+      if (lessons.length === 0) {
+        el.classList.add('hidden');
+        return;
+      }
+      const names = lessons.map(l => Utils._escapeHtml(l.name)).join('、');
+      el.classList.remove('hidden');
+      el.innerHTML = `⚠️ 実施クラス未設定の授業: <strong>${names}</strong> — <a href="lesson-admin.html">授業管理</a>でクラスを追加してください。`;
+    } catch (e) {
+      // 警告表示失敗は無視
+    }
   }
 
   // ページ離脱時にクリーンアップ

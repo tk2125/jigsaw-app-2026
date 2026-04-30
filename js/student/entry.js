@@ -118,6 +118,10 @@
         Utils.showError('パスワードが正しくありません。先生に確認してください。');
         return;
       }
+      if (result.inactive) {
+        Utils.showError('授業がまだ始まっていません。先生が開始するまでお待ちください。');
+        return;
+      }
 
       foundLesson = result;
       Utils.setLoading(false);

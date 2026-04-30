@@ -346,6 +346,7 @@
       Utils.showError('授業名を入力してください');
       return;
     }
+    const isNew = !currentLessonId;
 
     const suitCount = parseInt(document.querySelector('input[name="suit-count"]:checked').value);
     const positionType = document.querySelector('input[name="position-type"]:checked').value;
@@ -400,6 +401,11 @@
       // 実施クラスセクションを表示
       await loadSessionsForLesson(currentLessonId);
       await loadLessons();
+
+      if (isNew) {
+        document.getElementById('new-lesson-banner').classList.remove('hidden');
+        document.getElementById('sessions-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
 
     } catch (err) {
       Utils.showError('保存に失敗しました: ' + err.message);

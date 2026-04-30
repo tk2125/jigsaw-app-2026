@@ -45,12 +45,15 @@
           </button>
           <span class="last-updated" id="last-updated"></span>
           <button id="btn-refresh" class="btn btn-secondary btn-sm">🔄 更新</button>
+          <button id="btn-deactivate-all" class="btn btn-secondary btn-sm">⏹ 全授業終了</button>
         </div>
       </header>
 
       <main class="teacher-content">
         <div id="error-message" class="alert alert-error hidden"></div>
         <div id="success-message" class="alert alert-success hidden"></div>
+
+        <div id="no-session-warning" class="hidden" style="background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;padding:10px 14px;margin-bottom:12px;color:#92400e;font-size:13px;"></div>
 
         <!-- 授業選択セクション -->
         <div class="card mb-md">
